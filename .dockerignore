@@ -1,0 +1,4 @@
+stub/
+__pycache__/
+data/
+*.zip

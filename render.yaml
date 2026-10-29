@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: corelog
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: META_API_KEY
+        sync: false
+      - key: BASETEN_API_KEY
+        sync: false
+      - key: CORELOG_TOKEN
+        sync: false
+      - key: GLIMMER_URL
+        sync: false
+      - key: GLIMMER_KEY
+        sync: false
+      - key: CORELOG_DOMAIN
+        value: sedimentary

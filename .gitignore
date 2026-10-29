@@ -1,0 +1,6 @@
+data/
+__pycache__/
+*.pyc
+.env
+*.db
+# Les clés ne vont JAMAIS dans le dépôt : variables d'environnement uniquement.

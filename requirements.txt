@@ -1,0 +1,8 @@
+starlette>=0.37
+uvicorn>=0.30
+python-multipart>=0.0.9
+openai>=1.40
+numpy
+opencv-python-headless
+websockets>=12
+requests

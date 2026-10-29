@@ -1,0 +1,93 @@
+{
+ "id": "sedimentary",
+ "nom": {
+  "fr": "Roches sédimentaires (testé)",
+  "en": "Sedimentary rocks (tested)"
+ },
+ "statut": "testé sur 10 photos réelles",
+ "lithologies": [
+  {
+   "id": "sandstone",
+   "fr": "grès",
+   "en": "sandstone",
+   "couleur": "#C9A86A",
+   "famille": "grès"
+  },
+  {
+   "id": "limestone",
+   "fr": "calcaire",
+   "en": "limestone",
+   "couleur": "#D8D4C4",
+   "famille": "carbonate"
+  },
+  {
+   "id": "shale",
+   "fr": "schiste",
+   "en": "shale",
+   "couleur": "#3E4C5A",
+   "famille": "fin"
+  },
+  {
+   "id": "claystone",
+   "fr": "argilite",
+   "en": "claystone",
+   "couleur": "#7F93A6",
+   "famille": "fin"
+  },
+  {
+   "id": "unlithified_clay",
+   "fr": "argile meuble",
+   "en": "unconsolidated clay",
+   "couleur": "#A08A6E",
+   "famille": "fin"
+  },
+  {
+   "id": "soil_or_fill",
+   "fr": "sol, remblai",
+   "en": "soil, fill",
+   "couleur": "#7B5432",
+   "famille": "sol/remblai"
+  },
+  {
+   "id": "other",
+   "fr": "autre",
+   "en": "other",
+   "couleur": "#8A938D",
+   "famille": "autre"
+  },
+  {
+   "id": "unknown",
+   "fr": "inconnu",
+   "en": "unknown",
+   "couleur": "#B9BEB6",
+   "famille": "inconnu"
+  }
+ ],
+ "regles_prompt": "Fine-grained rocks: massive, homogeneous, blocky breaks -> claystone; fissile, finely laminated or bedded -> shale; unlithified_clay only if the core is soft or plastic, smeared by drilling, with no lamination and no sharp fractures. Distinguish unlithified clay or soil from lithified rock. ",
+ "lexique_note": [
+  [
+   "argil\\w*\\s+(meuble|molle|plastique|non\\s+lithifi\\w*)|non\\s+lithifi\\w*",
+   "unlithified_clay"
+  ],
+  [
+   "\\bsol\\b|remblai|racine|terre\\s+v[ée]g[ée]tale",
+   "soil_or_fill"
+  ],
+  [
+   "(?<![a-zà-ÿ])gr(?:è|e|ai)s|sandstone|sableux",
+   "sandstone"
+  ],
+  [
+   "calcaire|limestone|carbonat\\w*",
+   "limestone"
+  ],
+  [
+   "s?chist\\w*|shale|fissile",
+   "shale"
+  ],
+  [
+   "arg[ieéè]l\\w*|claystone|mudstone",
+   "claystone"
+  ]
+ ]
+}

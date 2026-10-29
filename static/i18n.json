@@ -1,0 +1,698 @@
+[
+[
+"INSTABILITÉ : lectures du même modèle",
+"INSTABILITY: readings by the same model"
+],
+[
+", à confirmer",
+", to be confirmed"
+],
+[
+"aucune majorité",
+"no majority"
+],
+[
+"→ vote",
+"→ vote"
+],
+[
+"MESURE instable : (\\d+) fractures annoncées sur ~1 m, à recompter",
+"UNSTABLE measure: $1 fractures reported over ~1 m, recount"
+],
+[
+"MESURE instable : fractures lues (.*), médiane (\\d+) retenue",
+"UNSTABLE measure: fractures read $1, median $2 kept"
+],
+[
+"ÉTIQUETTE : identifiant « (.*) » signalé incertain par le modèle, relecture non concluante",
+"LABEL: hole ID « $1 » flagged uncertain by the model, re-read inconclusive"
+],
+[
+"ÉTIQUETTE illisible \\(principal\\)",
+"LABEL unreadable (primary read)"
+],
+[
+"ÉTIQUETTE : texte non transcrit \\(identifiant de forage introuvable\\), chiffres à vérifier",
+"LABEL: text not transcribed (hole ID not found), check the numbers"
+],
+[
+"ÉTIQUETTE : longueur forée (.*) m ≠ fin − début \\((.*) m\\), lecture à vérifier",
+"LABEL: drilled length $1 m ≠ end − start ($2 m), reading to check"
+],
+[
+"ÉTIQUETTE : récupération > longueur forée",
+"LABEL: recovery > drilled length"
+],
+[
+"QUALITÉ :",
+"QUALITY:"
+],
+[
+"FICHIER illisible",
+"FILE unreadable"
+],
+[
+"ÉCHEC modèle principal",
+"PRIMARY MODEL failed"
+],
+[
+"CONFIANCE basse",
+"LOW confidence"
+],
+[
+"lithologie non confirmée : second avis en abstention et confiance basse",
+"lithology unconfirmed: second opinion abstained and low confidence"
+],
+[
+"lithologie inconnue",
+"unknown lithology"
+],
+[
+"second avis indisponible",
+"second opinion unavailable"
+],
+[
+"second avis : abstention \\(lithologie inconnue\\), non comptée comme désaccord",
+"second opinion: abstention (unknown lithology), not counted as disagreement"
+],
+[
+"second avis lu sur la carotte isolée par SAM \\(sans étiquette, ruban ni cartes de couleur\\)",
+"second opinion read on the core isolated by SAM (no label, tape or colour cards)"
+],
+[
+"nuance lithologique : principal (.*) / second avis (.*)",
+"lithology nuance: primary $1 / second opinion $2"
+],
+[
+"DÉSACCORD étiquette",
+"LABEL disagreement"
+],
+[
+"NOTE incohérente avec la photo : la note parle de (.*), la lecture de la photo donne (.*)",
+"NOTE inconsistent with the photo: the note mentions $1, the photo reading gives $2"
+],
+[
+"NOTE incohérente avec la photo",
+"NOTE inconsistent with the photo"
+],
+[
+"CONTRÔLE :",
+"CHECK:"
+],
+[
+"identifiant de forage lu « (.*) » ≠ « (.*) » \\(majorité\\)(, probable erreur de lecture)?",
+"hole ID read « $1 » ≠ « $2 » (majority)"
+],
+[
+"étiquette du run (\\d+) différente de celle des autres photos du même run",
+"run $1 label differs from the other photos of the same run"
+],
+[
+"Run (\\d+) : étiquettes différentes selon les photos :",
+"Run $1: labels differ between photos:"
+],
+[
+"Run (\\d+) : récupération (.*) m > longueur de la run (.*) m",
+"Run $1: recovery $2 m > run length $3 m"
+],
+[
+"ORDRE : run (\\d+) \\((.*) m\\) situé après run (\\d+) \\((.*) m\\) : numéros incohérents",
+"ORDER: run $1 ($2 m) located after run $3 ($4 m): inconsistent numbering"
+],
+[
+"TROU anormal entre runs consécutifs (\\d+) et (\\d+) : (.*) m non couverts",
+"Abnormal GAP between consecutive runs $1 and $2: $3 m not covered"
+],
+[
+"CHEVAUCHEMENT entre run (\\d+) et run (\\d+)",
+"OVERLAP between run $1 and run $2"
+],
+[
+"(\\d+) run\\(s\\) intermédiaire\\(s\\) non fourni\\(s\\) entre run (\\d+) et run (\\d+)",
+"$1 intermediate run(s) not provided between run $2 and run $3"
+],
+[
+"Run (\\d+) \\((.*) m, récup (.*) m\\) : (\\d+) photo\\(s\\), ~(.*) m visibles au total",
+"Run $1 ($2 m, rec. $3 m): $4 photo(s), ~$5 m visible in total"
+],
+[
+"étiquette transcrite par relecture ciblée",
+"label transcribed by targeted re-read"
+],
+[
+" corrigé par le code : ",
+" corrected by code: "
+],
+[
+"\\(lu dans l'étiquette transcrite\\)",
+"(read from the transcribed label)"
+],
+[
+"longueur visible recalculée par le code",
+"visible length recomputed by code"
+],
+[
+"ruban incomplet \\((.*)\\) : longueur visible non mesurée \\(estimation du modèle (.*) m écartée\\)",
+"incomplete tape ($1): visible length not measured (model estimate $2 m discarded)"
+],
+[
+"ruban lu en entier sur une autre lecture \\((.*)\\) : longueur visible (.*) m",
+"tape fully read on another reading ($1): visible length $2 m"
+],
+[
+"étiquette relue sur recadrage SAM : chiffres cohérents",
+"label re-read on SAM crop: consistent figures"
+],
+[
+"relecture sur recadrage SAM : toujours incohérente",
+"re-read on SAM crop: still inconsistent"
+],
+[
+"très flou",
+"very blurry"
+],
+[
+"flou probable",
+"probably blurry"
+],
+[
+"trop sombre",
+"too dark"
+],
+[
+"surexposé",
+"overexposed"
+],
+[
+"^Sondages$",
+"Boreholes"
+],
+[
+"^Architecture$",
+"Architecture"
+],
+[
+"^Code d'accès$",
+"Access code"
+],
+[
+"^Entrer$",
+"Enter"
+],
+[
+"^Nouveau sondage$",
+"New borehole"
+],
+[
+"^Créer le sondage$",
+"Create borehole"
+],
+[
+"^← Sondages$",
+"← Boreholes"
+],
+[
+"^← Sondage$",
+"← Borehole"
+],
+[
+"^Photographier un run$",
+"Photograph a run"
+],
+[
+"^Contrôles entre runs$",
+"Cross-run checks"
+],
+[
+"^Analyse en cours…$",
+"Analysis in progress…"
+],
+[
+"^En file d'attente…$",
+"Queued…"
+],
+[
+"^Run illisible$",
+"Unreadable run"
+],
+[
+"^Supprimer$",
+"Delete"
+],
+[
+"^Photo à refaire$",
+"Retake photo"
+],
+[
+"^Validé$",
+"Validated"
+],
+[
+"^Auto · relecture légère$",
+"Auto · light review"
+],
+[
+"^À valider$",
+"To validate"
+],
+[
+"^Carotte entière$",
+"Whole core"
+],
+[
+"^Ruban : première → dernière graduation$",
+"Tape: first → last mark"
+],
+[
+"^Étiquette + cartes$",
+"Label + colour cards"
+],
+[
+"^Contrôle qualité…$",
+"Quality check…"
+],
+[
+"^Annuler$",
+"Cancel"
+],
+[
+"^Choisir un fichier$",
+"Choose a file"
+],
+[
+"^Netteté et lumière OK$",
+"Sharpness and light OK"
+],
+[
+"^Envoi…$",
+"Sending…"
+],
+[
+"^Caméra indisponible : choisis un fichier$",
+"Camera unavailable: choose a file"
+],
+[
+"^Caméra pas prête.$",
+"Camera not ready."
+],
+[
+"^Micro refusé ou indisponible.$",
+"Microphone denied or unavailable."
+],
+[
+"^Prendre la photo$",
+"Take the photo"
+],
+[
+"^Dicter une note$",
+"Dictate a note"
+],
+[
+"^Analyse$",
+"Analysis"
+],
+[
+"^Contrôle qualité de la photo$",
+"Photo quality check"
+],
+[
+"^OpenCV · code déterministe$",
+"OpenCV · deterministic code"
+],
+[
+"^Transcription de la note dictée$",
+"Dictated note transcription"
+],
+[
+"^Troisième lecture \\(départage\\)$",
+"Third reading (tie-break)"
+],
+[
+"^Seconde lecture indépendante$",
+"Second independent reading"
+],
+[
+"^Lecture de la carotte et de l'étiquette$",
+"Reading of the core and the label"
+],
+[
+"^Relecture ciblée de l'étiquette$",
+"Targeted re-read of the label"
+],
+[
+"^SAM 3\\.1 \\(recadrage\\)$",
+"SAM 3.1 (crop)"
+],
+[
+"^En attente d'un créneau$",
+"Waiting for a slot"
+],
+[
+"^Étape suivante…$",
+"Next step…"
+],
+[
+"^environ 20 à 40 s par photo$",
+"about 20 to 40 s per photo"
+],
+[
+"^Tu peux quitter cet écran : l'analyse continue sur le serveur.$",
+"You can leave this screen: the analysis continues on the server."
+],
+[
+"^Photo envoyée$",
+"Uploaded photo"
+],
+[
+"^Photo du run$",
+"Run photo"
+],
+[
+"^Validation$",
+"Validation"
+],
+[
+"^Pourquoi cette décision$",
+"Why this decision"
+],
+[
+"^Refaire la photo$",
+"Retake the photo"
+],
+[
+"^Réessayer l'analyse$",
+"Retry the analysis"
+],
+[
+"^Mesures$",
+"Measurements"
+],
+[
+"^Foré$",
+"Drilled"
+],
+[
+"^Récupéré$",
+"Recovered"
+],
+[
+"^Visible \\(ruban\\)$",
+"Visible (tape)"
+],
+[
+"^Fractures$",
+"Fractures"
+],
+[
+"^Note$",
+"Note"
+],
+[
+"^Lithologie$",
+"Lithology"
+],
+[
+"^Fractures \\(corriger\\)$",
+"Fractures (correct)"
+],
+[
+"^Commentaire \\(facultatif\\)$",
+"Comment (optional)"
+],
+[
+"^Valider$",
+"Validate"
+],
+[
+"^Mettre à jour$",
+"Update"
+],
+[
+"^Supprimer cette photo$",
+"Delete this photo"
+],
+[
+"^Choisis au moins une lithologie\\.$",
+"Choose at least one lithology."
+],
+[
+"^Validé\\.$",
+"Validated."
+],
+[
+"^Moins$",
+"Less"
+],
+[
+"^Plus$",
+"More"
+],
+[
+"^Aucun run placé$",
+"No run placed"
+],
+[
+"^sans photo$",
+"no photo"
+],
+[
+"^Photographie au moins un run avec une étiquette lisible\\.$",
+"Photograph at least one run with a legible label."
+],
+[
+"^Photos non placées$",
+"Unplaced photos"
+],
+[
+"^Étiquette illisible ou photo à refaire$",
+"Unreadable label or photo to retake"
+],
+[
+"^Contrôles$",
+"Checks"
+],
+[
+"^Couverture$",
+"Coverage"
+],
+[
+"^Exporter CSV$",
+"Export CSV"
+],
+[
+"^Exporter JSON$",
+"Export JSON"
+],
+[
+"^Export impossible\\.$",
+"Export failed."
+],
+[
+"^Qui fait quoi$",
+"Who does what"
+],
+[
+"^Se déconnecter$",
+"Sign out"
+],
+[
+"^Le brouillon vient de modèles de vision : tout run « à valider » doit être relu avant usage\\.$",
+"The draft comes from vision models: every run « to validate » must be reviewed before use."
+],
+[
+"^Ce serveur est protégé\\. Saisis le code d'accès fourni\\.$",
+"This server is protected. Enter the access code you were given."
+],
+[
+"^Aucun sondage\\. Crée-en un, puis photographie tes carottes run par run\\.$",
+"No borehole yet. Create one, then photograph your cores run by run."
+],
+[
+"^Donne un nom au sondage\\.$",
+"Give the borehole a name."
+],
+[
+"^ex\\. PH-016B$",
+"e.g. PH-016B"
+],
+[
+"^Enregistrement… appuie à nouveau pour arrêter\\. Dis directement ta note\\.$",
+"Recording… tap again to stop. Just say your note."
+],
+[
+"^Fichier prêt : appuie sur le déclencheur\\.$",
+"File ready: press the shutter."
+],
+[
+"^branché$",
+"connected"
+],
+[
+"^non branché$",
+"not connected"
+],
+[
+"^clé absente$",
+"key missing"
+],
+[
+"^ici$",
+"here"
+],
+[
+"^code$",
+"code"
+],
+[
+"^humain$",
+"human"
+],
+[
+"^Décision$",
+"Decision"
+],
+[
+"^PWA \\(ce téléphone\\)$",
+"PWA (this phone)"
+],
+[
+"^Caméra et guides, dictée, validation, journal\\. Aucune clé, aucun modèle ici\\.$",
+"Camera and guides, dictation, validation, log. No key, no model here."
+],
+[
+"^Serveur CoreLog$",
+"CoreLog server"
+],
+[
+"^API, file de travail, SQLite\\. Les clés restent côté serveur\\.$",
+"API, work queue, SQLite. Keys stay on the server."
+],
+[
+"^OpenCV · code$",
+"OpenCV · code"
+],
+[
+"^Netteté, lumière, bande de carotte\\. Contrôles déterministes à la fin : arithmétique des étiquettes, ordre, trous, chevauchements, note contre photo\\.$",
+"Sharpness, light, core band. Deterministic checks at the end: label arithmetic, order, gaps, overlaps, note versus photo."
+],
+[
+"^Lit la photo en JSON strict, relit l'étiquette, départage les désaccords \\(vote majoritaire\\)\\.$",
+"Reads the photo into strict JSON, re-reads the label, breaks ties (majority vote)."
+],
+[
+"^Localise et recadre l'étiquette pour une relecture ciblée\\.$",
+"Locates and crops the label for a targeted re-read."
+],
+[
+"^Transcrit la note dictée \\(français\\)\\.$",
+"Transcribes the dictated note."
+],
+[
+"^Second avis indépendant, quand il est hébergé\\. Sinon : deuxième lecture du même modèle \\(auto-cohérence\\)\\.$",
+"Independent second opinion, once hosted. Otherwise: second reading by the same model (self-consistency)."
+],
+[
+"^« Auto » = relecture légère, jamais validation définitive\\. Toute incertitude renvoie à l'humain\\.$",
+"« Auto » = light review, never final validation. Any uncertainty goes back to the human."
+],
+[
+"^Journal( · |$)",
+"Log$1"
+],
+[
+"^Profondeur ",
+"Depth "
+],
+[
+"^Pas de photo · ",
+"No photo · "
+],
+[
+"récup\\. ",
+"rec. "
+],
+[
+"^récup\\.",
+"rec."
+],
+[
+" · à valider",
+" · to validate"
+],
+[
+"^Run ",
+"Run "
+],
+[
+"^Proposée par l'agent : ",
+"Proposed by the agent: "
+],
+[
+" · confiance min\\. ",
+" · min. confidence "
+],
+[
+"^netteté (\\d+)$",
+"sharpness $1"
+],
+[
+"^lumière (\\d+)$",
+"light $1"
+],
+[
+"^Note dictée prête \\((\\d+) s\\)\\. Elle sera transcrite par le serveur\\.$",
+"Dictated note ready ($1 s). The server will transcribe it."
+],
+[
+"^Envoi impossible : ",
+"Upload failed: "
+],
+[
+"^Qualité douteuse : (.*)\\. Tu peux choisir une autre photo\\.$",
+"Doubtful quality: $1. You can choose another photo."
+],
+[
+"^Qualité douteuse \\((.*)\\)\\. Envoyer quand même \\?$",
+"Doubtful quality ($1). Send anyway?"
+],
+[
+"^Supprimer ce sondage et toutes ses photos \\?$",
+"Delete this borehole and all its photos?"
+],
+[
+"^Supprimer cette photo \\?$",
+"Delete this photo?"
+],
+[
+"^Serveur protégé par code : oui · file : (\\d+)$",
+"Server protected by access code: yes · queue: $1"
+],
+[
+"^Serveur protégé par code : non · file : (\\d+)$",
+"Server protected by access code: no · queue: $1"
+],
+[
+"^Analyse en cours…$",
+"Analysis in progress…"
+],
+[
+"^Note écrite \\(facultatif\\) : lithologie, nombre de fractures…$",
+"Written note (optional): lithology, number of fractures…"
+],
+[
+"^Domaine géologique$",
+"Geological domain"
+],
+[
+"NON TESTÉ : aucune photo réelle évaluée",
+"UNTESTED: no real photo evaluated"
+],
+[
+"testé sur 10 photos réelles",
+"tested on 10 real photos"
+],
+[
+" \\(testé\\)$",
+""
+]
+]

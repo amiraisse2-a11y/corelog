@@ -1,0 +1,119 @@
+{
+ "id": "crystalline",
+ "nom": {
+  "fr": "Roches cristallines et structurales (non testé)",
+  "en": "Crystalline and structural rocks (untested)"
+ },
+ "statut": "NON TESTÉ : aucune photo réelle évaluée",
+ "lithologies": [
+  {
+   "id": "granite",
+   "fr": "granite, granitoïde",
+   "en": "granite, granitoid",
+   "couleur": "#D9A5A0",
+   "famille": "felsique"
+  },
+  {
+   "id": "gabbro_basalt",
+   "fr": "gabbro, basalte, dolérite",
+   "en": "gabbro, basalt, dolerite",
+   "couleur": "#3F4A3F",
+   "famille": "mafique"
+  },
+  {
+   "id": "gneiss",
+   "fr": "gneiss",
+   "en": "gneiss",
+   "couleur": "#9A8FA8",
+   "famille": "métamorphique foliée"
+  },
+  {
+   "id": "schist",
+   "fr": "micaschiste, schiste cristallin",
+   "en": "mica schist, crystalline schist",
+   "couleur": "#6C7A8C",
+   "famille": "métamorphique foliée"
+  },
+  {
+   "id": "amphibolite",
+   "fr": "amphibolite",
+   "en": "amphibolite",
+   "couleur": "#2F5A4A",
+   "famille": "métamorphique foliée"
+  },
+  {
+   "id": "quartzite",
+   "fr": "quartzite",
+   "en": "quartzite",
+   "couleur": "#E3DFD0",
+   "famille": "métamorphique massive"
+  },
+  {
+   "id": "saprolite_weathered",
+   "fr": "saprolite, roche altérée",
+   "en": "saprolite, weathered rock",
+   "couleur": "#B5651D",
+   "famille": "altéré"
+  },
+  {
+   "id": "fault_rock",
+   "fr": "roche de faille (brèche, cataclasite, mylonite)",
+   "en": "fault rock (breccia, cataclasite, mylonite)",
+   "couleur": "#8C4A5A",
+   "famille": "structural"
+  },
+  {
+   "id": "other",
+   "fr": "autre",
+   "en": "other",
+   "couleur": "#8A938D",
+   "famille": "autre"
+  },
+  {
+   "id": "unknown",
+   "fr": "inconnu",
+   "en": "unknown",
+   "couleur": "#B9BEB6",
+   "famille": "inconnu"
+  }
+ ],
+ "regles_prompt": "Crystalline and structural cores: decide from texture and fabric. Interlocking visible grains, pale (quartz, feldspar), no foliation -> granite; dark, heavy, fine to coarse, no foliation -> gabbro_basalt; coarse banded or foliated pale and dark layers -> gneiss; fine, shiny, strongly foliated, splits into flakes -> schist; dark green-black foliated -> amphibolite; very hard, massive, pale, glassy or sugary, no foliation -> quartzite; soft, ochre-red-brown, crumbly, with ghost relics of the rock fabric (weathering profile) -> saprolite_weathered; angular crushed fragments, clay gouge, sheared or polished surfaces along a fault -> fault_rock. Distinguish weathered rock from fresh rock. A vein or a fracture is not a lithology: count fractures, do not report them as an interval. ",
+ "lexique_note": [
+  [
+   "micaschist\\w*|mica\\s*schist\\w*",
+   "schist"
+  ],
+  [
+   "saprolit\\w*|alt[ée]r[ée]\\w*|lat[ée]rit\\w*",
+   "saprolite_weathered"
+  ],
+  [
+   "fail+e|br[èe]ch\\w*|cataclas\\w*|mylonit\\w*|gouge",
+   "fault_rock"
+  ],
+  [
+   "granit\\w*|granodiorit\\w*|tonalit\\w*",
+   "granite"
+  ],
+  [
+   "gabbro|basalt\\w*|d[ée]ol?rit\\w*|diabase",
+   "gabbro_basalt"
+  ],
+  [
+   "gneiss\\w*",
+   "gneiss"
+  ],
+  [
+   "amphibolit\\w*",
+   "amphibolite"
+  ],
+  [
+   "quartzit\\w*",
+   "quartzite"
+  ],
+  [
+   "(?<![a-zà-ÿ])s?chist\\w*",
+   "schist"
+  ]
+ ]
+}

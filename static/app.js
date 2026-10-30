@@ -46,7 +46,7 @@ function login(msg) {
   <p class="mut">${esc(msg || "Ce serveur est protégé. Saisis le code d'accès fourni.")}</p>
   <input id="tk" type="password" autocomplete="current-password" placeholder="Code d'accès"><p></p>
   <button class="full" id="go">Entrer</button>`;
-  $("#go").onclick = async () => { token = $("#tk").value.trim(); LS.set("corelog_token", token);
+  $("#go").onclick = async () => { token = $("#tk").value.trim(); LS.set("corelog_token", token); DOMAINE = null;
     try { await api("/sondages"); route(); } catch { } };
 }
 
@@ -57,12 +57,12 @@ function tabs(active) {
   t.hidden = false;
   t.innerHTML = `<a href="#/" class="${active === "runs" ? "on" : ""}"><svg viewBox="0 0 24 24"><path d="M5 6h14M5 12h14M5 18h14"/></svg>Sondages</a>
   <a href="${sid ? "#/s/" + sid + "/journal" : "#/"}" class="${active === "journal" ? "on" : ""}"><svg viewBox="0 0 24 24"><path d="M8 3v18M8 7h8M8 13h11M8 18h6"/></svg>Journal</a>
-  <a href="#/archi" class="${active === "archi" ? "on" : ""}"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="6" rx="1"/><rect x="14" y="14" width="7" height="6" rx="1"/><path d="M10 7h4a3 3 0 0 1 3 3v4"/></svg>Architecture</a>`;
+  ${ROLE === "admin" ? `<a href="#/archi" class="${active === "archi" ? "on" : ""}"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="6" rx="1"/><rect x="14" y="14" width="7" height="6" rx="1"/><path d="M10 7h4a3 3 0 0 1 3 3v4"/></svg>Architecture</a>` : ""}`;
 }
-let DOMAINE = null;
+let DOMAINE = null, ROLE = "admin";
 async function loadDomain() {   // les lithologies viennent du serveur (domains/*.json) : changer de type de roche ne touche pas l'interface
   if (DOMAINE) return;
-  try { const c = await api("/config"); DOMAINE = c.domaine;
+  try { const c = await api("/config"); DOMAINE = c.domaine; ROLE = c.role || "admin";
     for (const k in LITHO) delete LITHO[k]; for (const k in LEN) delete LEN[k];
     DOMAINE.lithologies.forEach(l => { LITHO[l.id] = [l.fr, l.couleur]; LEN[l.id] = l.en; }); } catch (e) { if (e.message === "accès refusé") throw e; }
 }
@@ -75,7 +75,7 @@ async function route() {
     if (h[0] === "s" && h[2] === "journal") return await vJournal(h[1]);
     if (h[0] === "s") return await vRuns(h[1]);
     if (h[0] === "p") return await vPhoto(h[1]);
-    if (h[0] === "archi") return await vArchi();
+    if (h[0] === "archi" && ROLE === "admin") return await vArchi();
     location.hash = "#/";
   } catch (e) { if (e.message !== "accès refusé") { app.innerHTML = `<h1>Erreur</h1><p>${esc(e.message)}</p><a class="btn sec" href="#/">Retour</a>`; } }
 }
@@ -293,7 +293,7 @@ async function vArchi() {
   <div class="node"><b>Décision<span class="chip warn">humain</span></b><div class="mut">« Auto » = relecture légère, jamais validation définitive. Toute incertitude renvoie à l'humain.</div></div></div>
   <p class="mut">Serveur protégé par code : ${c.acces_protege ? "oui" : "non"} · file : ${c.file ?? 0}</p>
   <button class="ghost" id="out">Se déconnecter</button>`;
-  $("#out").onclick = () => { token = ""; LS.set("corelog_token", ""); location.hash = "#/"; route(); };
+  $("#out").onclick = () => { token = ""; DOMAINE = null; ROLE = "admin"; LS.set("corelog_token", ""); location.hash = "#/"; route(); };
 }
 
 /* ---------- démarrage ---------- */

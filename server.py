@@ -3,7 +3,9 @@
 Variables d'environnement :
   META_API_KEY, BASETEN_API_KEY      clés des modèles (obligatoires pour analyser)
   GLIMMER_URL, GLIMMER_KEY           second avis Glimmer (optionnel)
-  CORELOG_TOKEN                      code d'accès demandé par l'API (recommandé dès que le serveur est public)
+  CORELOG_TOKEN                      code administrateur (voit tout, y compris l'écran Architecture)
+  CORELOG_DEMO_TOKENS                codes de démonstration séparés par des virgules : chacun a son espace privé, sans Architecture,
+                                     et un quota de photos (DEMO_MAX_PHOTOS, défaut 40 par code)
   DATA_DIR                           dossier des photos et de la base (défaut ./data)
 Lancement : uvicorn server:app --host 0.0.0.0 --port 7860
 """
@@ -23,6 +25,9 @@ import agent_core as A
 BASE = Path(__file__).parent
 DATA = Path(os.environ.get("DATA_DIR", BASE / "data")); (DATA / "img").mkdir(parents=True, exist_ok=True)
 TOKEN = os.environ.get("CORELOG_TOKEN", "")
+DEMO_TOKENS = [t.strip() for t in os.environ.get("CORELOG_DEMO_TOKENS", "").split(",") if t.strip()]
+DEMO_MAX_PHOTOS = int(os.environ.get("DEMO_MAX_PHOTOS", "40"))
+PROTEGE = bool(TOKEN or DEMO_TOKENS)
 MAX_UPLOAD = 25 * 1024 * 1024
 DONE_OK = "AUTO (relecture légère)"
 import re
@@ -43,11 +48,15 @@ _db_lock = threading.RLock()
 _db = sqlite3.connect(DATA / "corelog.db", check_same_thread=False)
 _db.row_factory = sqlite3.Row
 _db.executescript("""
-CREATE TABLE IF NOT EXISTS sondages (id TEXT PRIMARY KEY, nom TEXT, cree REAL);
+CREATE TABLE IF NOT EXISTS sondages (id TEXT PRIMARY KEY, nom TEXT, cree REAL, owner TEXT);
 CREATE TABLE IF NOT EXISTS photos (
   id TEXT PRIMARY KEY, sondage TEXT, fichier TEXT, note TEXT, statut TEXT, etapes TEXT, row TEXT,
   cout REAL, duree REAL, validation TEXT, cree REAL);
 """)
+
+
+try: _db.execute("ALTER TABLE sondages ADD COLUMN owner TEXT"); _db.commit()
+except sqlite3.OperationalError: pass   # colonne déjà présente
 
 
 def q(sql, *a):
@@ -56,6 +65,21 @@ def q(sql, *a):
 
 
 def j(x): return json.dumps(x, ensure_ascii=False, default=str)
+
+
+def interdit(request, sid):
+    """Un code de démonstration ne voit que ses propres sondages ; l'administrateur voit tout."""
+    if request.state.role == "admin": return False
+    r = q("SELECT owner FROM sondages WHERE id=?", sid)
+    return (not r) or r[0]["owner"] != request.state.owner
+
+
+def interdit_photo(request, pid):
+    r = q("SELECT sondage FROM photos WHERE id=?", pid)
+    return (not r) or interdit(request, r[0]["sondage"])
+
+
+NF = lambda: JSONResponse({"erreur": "introuvable"}, 404)
 
 
 # ---------------------------------------------------------------- file de travail (un seul job à la fois : TRACE est global)
@@ -167,25 +191,31 @@ def body(request):
 
 
 async def sondages_list(request):
-    return JSONResponse([{"id": r["id"], "nom": r["nom"], "photos": r["n"]} for r in q(
-        "SELECT s.id, s.nom, (SELECT COUNT(*) FROM photos p WHERE p.sondage=s.id) AS n FROM sondages s ORDER BY s.cree DESC")])
+    adm = request.state.role == "admin"
+    rows = q("SELECT s.id, s.nom, (SELECT COUNT(*) FROM photos p WHERE p.sondage=s.id) AS n FROM sondages s " + ("" if adm else "WHERE s.owner=? ") + "ORDER BY s.cree DESC",
+             *([] if adm else [request.state.owner]))
+    return JSONResponse([{"id": r["id"], "nom": r["nom"], "photos": r["n"]} for r in rows])
 
 
 async def sondage_create(request):
     nom = ((await body(request)).get("nom") or "").strip()[:80]
     if not nom: return JSONResponse({"erreur": "nom requis"}, 400)
-    sid = uuid.uuid4().hex[:10]; q("INSERT INTO sondages VALUES (?,?,?)", sid, nom, time.time())
+    sid = uuid.uuid4().hex[:10]; q("INSERT INTO sondages (id, nom, cree, owner) VALUES (?,?,?,?)", sid, nom, time.time(), request.state.owner)
     return JSONResponse({"id": sid, "nom": nom})
 
 
 async def sondage_get(request):
+    if interdit(request, request.path_params["sid"]): return NF()
     v = sondage_view(request.path_params["sid"])
     return JSONResponse(v) if v else JSONResponse({"erreur": "introuvable"}, 404)
 
 
 async def photo_add(request):
     sid = request.path_params["sid"]
-    if not q("SELECT 1 FROM sondages WHERE id=?", sid): return JSONResponse({"erreur": "sondage introuvable"}, 404)
+    if not q("SELECT 1 FROM sondages WHERE id=?", sid) or interdit(request, sid): return JSONResponse({"erreur": "sondage introuvable"}, 404)
+    if request.state.role == "demo":
+        n = q("SELECT COUNT(*) AS n FROM photos p JOIN sondages s ON s.id=p.sondage WHERE s.owner=?", request.state.owner)[0]["n"]
+        if n >= DEMO_MAX_PHOTOS: return JSONResponse({"erreur": f"quota de démonstration atteint ({DEMO_MAX_PHOTOS} photos)"}, 429)
     form = await request.form()
     ph = form.get("photo")
     if ph is None or not hasattr(ph, "read"): return JSONResponse({"erreur": "champ « photo » manquant"}, 400)
@@ -207,6 +237,7 @@ async def photo_add(request):
 
 
 async def photo_get(request):
+    if interdit_photo(request, request.path_params["pid"]): return NF()
     pid = request.path_params["pid"]
     r = q("SELECT sondage FROM photos WHERE id=?", pid)
     if not r: return JSONResponse({"erreur": "introuvable"}, 404)
@@ -217,6 +248,7 @@ async def photo_get(request):
 
 
 async def photo_image(request):
+    if interdit_photo(request, request.path_params["pid"]): return NF()
     r = q("SELECT fichier FROM photos WHERE id=?", request.path_params["pid"])
     if not r: return Response(status_code=404)
     return FileResponse(DATA / "img" / r[0]["fichier"], media_type="image/jpeg", headers={"Cache-Control": "private, max-age=86400"})
@@ -224,6 +256,7 @@ async def photo_image(request):
 
 async def photo_validate(request):
     """Corps : {valide: bool, lithologies: [..], fractures: int?, commentaire: str?}. valide=false annule la validation."""
+    if interdit_photo(request, request.path_params["pid"]): return NF()
     pid = request.path_params["pid"]
     if not q("SELECT 1 FROM photos WHERE id=?", pid): return JSONResponse({"erreur": "introuvable"}, 404)
     b = await body(request)
@@ -237,6 +270,7 @@ async def photo_validate(request):
 
 
 async def photo_delete(request):
+    if interdit_photo(request, request.path_params["pid"]): return NF()
     pid = request.path_params["pid"]
     r = q("SELECT fichier FROM photos WHERE id=?", pid)
     if not r: return JSONResponse({"erreur": "introuvable"}, 404)
@@ -246,6 +280,7 @@ async def photo_delete(request):
 
 
 async def photo_retry(request):
+    if interdit_photo(request, request.path_params["pid"]): return NF()
     pid = request.path_params["pid"]
     if not q("SELECT 1 FROM photos WHERE id=?", pid): return JSONResponse({"erreur": "introuvable"}, 404)
     q("UPDATE photos SET statut='en file', etapes='[]', row=NULL, validation=NULL WHERE id=?", pid); JOBS.put((pid, None))
@@ -264,6 +299,7 @@ async def qc(request):
 
 
 async def export_csv(request):
+    if interdit(request, request.path_params["sid"]): return NF()
     lang = "en" if request.query_params.get("lang") == "en" else "fr"
     rows, v = export_rows(request.path_params["sid"], lang)
     if v is None: return JSONResponse({"erreur": "introuvable"}, 404)
@@ -274,6 +310,7 @@ async def export_csv(request):
 
 
 async def export_json(request):
+    if interdit(request, request.path_params["sid"]): return NF()
     lang = "en" if request.query_params.get("lang") == "en" else "fr"
     rows, v = export_rows(request.path_params["sid"], lang)
     if v is None: return JSONResponse({"erreur": "introuvable"}, 404)
@@ -284,6 +321,7 @@ async def export_json(request):
 
 
 async def sondage_delete(request):
+    if interdit(request, request.path_params["sid"]): return NF()
     sid = request.path_params["sid"]
     for p in q("SELECT fichier FROM photos WHERE sondage=?", sid):
         try: (DATA / "img" / p["fichier"]).unlink()
@@ -293,10 +331,12 @@ async def sondage_delete(request):
 
 
 async def config(request):
+    if request.state.role != "admin":   # le testeur de démonstration ne voit ni l'architecture ni l'état des modèles
+        return JSONResponse({"role": "demo", "lithologies": list(A.LITHO), "domaine": {"id": A.DOMAIN_ID, "nom": A.DOMAIN["nom"], "statut": A.DOMAIN["statut"], "lithologies": A.DOMAIN["lithologies"]}})
     """État du serveur pour l'écran Architecture : quels modèles sont branchés (jamais les clés)."""
     return JSONResponse({"modeles": {"muse-spark-open": bool(A.SPARK_OPEN_KEY), "sam-3.1": bool(A.KEY and A.USE_SAM), "muse-voice-transcribe": bool(A.KEY),
                                       "glimmer": bool(A.GLIMMER_URL)},
-                         "lithologies": list(A.LITHO), "acces_protege": bool(TOKEN), "file": JOBS.qsize(),
+                         "lithologies": list(A.LITHO), "role": "admin", "acces_protege": PROTEGE, "file": JOBS.qsize(),
                          "domaine": {"id": A.DOMAIN_ID, "nom": A.DOMAIN["nom"], "statut": A.DOMAIN["statut"], "lithologies": A.DOMAIN["lithologies"]}})
 
 
@@ -306,15 +346,19 @@ async def health(request): return JSONResponse({"ok": True})
 # ---------------------------------------------------------------- accès
 class Garde(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
+        import hashlib
         p = request.url.path
-        if TOKEN and p.startswith("/api/") and p != "/api/ping":
+        request.state.role, request.state.owner = "admin", "public"
+        if PROTEGE and p.startswith("/api/") and p != "/api/ping":
             sent = request.headers.get("x-token") or request.query_params.get("token") or ""
-            if not hmac.compare_digest(sent, TOKEN):
-                return JSONResponse({"erreur": "code d'accès invalide"}, 401)
+            if TOKEN and hmac.compare_digest(sent, TOKEN): request.state.role, request.state.owner = "admin", "admin"
+            elif any(hmac.compare_digest(sent, t) for t in DEMO_TOKENS):
+                request.state.role, request.state.owner = "demo", hashlib.sha256(sent.encode()).hexdigest()[:12]
+            else: return JSONResponse({"erreur": "code d'accès invalide"}, 401)
         return await call_next(request)
 
 
-async def ping(request): return JSONResponse({"ok": True, "protege": bool(TOKEN)})
+async def ping(request): return JSONResponse({"ok": True, "protege": PROTEGE})
 
 
 routes = [

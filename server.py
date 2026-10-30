@@ -55,8 +55,9 @@ CREATE TABLE IF NOT EXISTS photos (
 """)
 
 
-try: _db.execute("ALTER TABLE sondages ADD COLUMN owner TEXT"); _db.commit()
-except sqlite3.OperationalError: pass   # colonne déjà présente
+for _ddl in ("ALTER TABLE sondages ADD COLUMN owner TEXT", "ALTER TABLE photos ADD COLUMN opts TEXT"):
+    try: _db.execute(_ddl); _db.commit()
+    except sqlite3.OperationalError: pass   # colonne déjà présente
 
 
 def q(sql, *a):
@@ -126,7 +127,8 @@ def _run(pid, audio):
         except Exception as e:
             _on_trace({"etape": "transcription impossible", "modele": "muse-voice-transcribe-1.0", "erreur": str(e)[:150]})
     data = (DATA / "img" / r["fichier"]).read_bytes()
-    row = A.safe_process(r["fichier"], data, note)
+    o = json.loads(r["opts"] or "{}")
+    row = A.safe_process(r["fichier"], data, note, etiquette=o.get("etiquette", True), meta=o.get("meta"))
     cout = sum(t.get("cout_usd", 0) for t in list(A.TRACE)[n0:])
     q("UPDATE photos SET statut='terminé', row=?, cout=?, duree=? WHERE id=?", j(row), round(cout, 4), round(time.time() - t0, 1), pid)
 
@@ -231,7 +233,15 @@ async def photo_add(request):
     pid = uuid.uuid4().hex[:12]; fichier = f"{pid}.jpg"
     (DATA / "img" / fichier).write_bytes(cv2.imencode(".jpg", im, [cv2.IMWRITE_JPEG_QUALITY, 92])[1].tobytes())
     note = (form.get("note") or "").strip()[:2000] or None
-    q("INSERT INTO photos (id,sondage,fichier,note,statut,etapes,cree) VALUES (?,?,?,?,?,?,?)", pid, sid, fichier, note, "en file", "[]", time.time())
+    opts = {"etiquette": str(form.get("etiquette", "1")) != "0"}
+    meta = {}
+    for k, cast in (("run", int), ("debut", float), ("fin", float)):
+        try: meta[k] = cast(str(form.get(k)).replace(",", ".")) if form.get(k) not in (None, "") else None
+        except ValueError: return JSONResponse({"erreur": f"valeur invalide pour {k}"}, 400)
+    if any(x is not None for x in meta.values()):
+        if meta["debut"] is not None and meta["fin"] is not None and meta["fin"] <= meta["debut"]: return JSONResponse({"erreur": "la profondeur de fin doit dépasser le début"}, 400)
+        opts["meta"] = meta
+    q("INSERT INTO photos (id,sondage,fichier,note,statut,etapes,cree,opts) VALUES (?,?,?,?,?,?,?,?)", pid, sid, fichier, note, "en file", "[]", time.time(), j(opts))
     JOBS.put((pid, audio))
     return JSONResponse({"id": pid, "statut": "en file", "file": JOBS.qsize()})
 

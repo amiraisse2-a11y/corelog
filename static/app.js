@@ -109,7 +109,7 @@ async function vRuns(sid) {
   ${items.map(it => {
     if (it.statut !== "terminé") return `<a class="card link" href="#/p/${it.id}"><div class="row" style="align-items:center"><div class="spin" style="flex:none;width:18px"></div><div><b>Analyse en cours…</b><div class="mut">${esc(it.statut)}</div></div></div></a>`;
     const r = it.row || {}, [cl, tx] = DEC(it.decision || r.decision);
-    const title = r.run >= 0 ? `Run ${r.run}` : "Run illisible";
+    const title = r.run >= 0 ? `Run ${r.run}` : (r.mode === "carotte" ? "Carotte seule" : "Run illisible");
     const dep = r.debut >= 0 ? `${num(r.debut)} – ${num(r.fin)} m` : "profondeur inconnue";
     return `<a class="card link" href="#/p/${it.id}"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b>${title} · ${dep}</b><span class="chip ${cl}">${tx}</span></div><div class="mut">${esc(litLabel(it))}${r.recup_m >= 0 ? ` · récup. ${num(r.recup_m)} m` : ""}</div></a>`;
   }).join("")}
@@ -129,6 +129,8 @@ async function vCapture(sid) {
   <div class="bar">
     <textarea id="note" placeholder="Note écrite (facultatif) : lithologie, nombre de fractures…" style="min-height:44px;height:44px;font-size:14px"></textarea>
     <div id="recinfo" class="mut" style="color:#cfd6d1" hidden></div>
+    <label style="display:flex;gap:8px;align-items:center;color:#cfd6d1;margin:0;font-size:13px"><input type="checkbox" id="noeti"> Photo sans étiquette (carotte seule)</label>
+    <div id="depths" style="display:none;gap:6px"><input id="d0" type="text" inputmode="decimal" placeholder="Début (m)" style="padding:8px;font-size:14px"><input id="d1" type="text" inputmode="decimal" placeholder="Fin (m)" style="padding:8px;font-size:14px"><input id="rn" type="text" inputmode="numeric" placeholder="Run" style="padding:8px;font-size:14px"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
       <button class="ghost" id="close" style="color:#fff">Annuler</button>
       <button class="shutter" id="shot" aria-label="Prendre la photo"></button>
@@ -138,6 +140,7 @@ async function vCapture(sid) {
   </div>`;
   document.body.appendChild(v);
   const vid = $("video", v), qcBox = $("#qc", v);
+  $("#noeti", v).onchange = e => { $("#depths", v).style.display = e.target.checked ? "flex" : "none"; };
   $("#close", v).onclick = () => { location.hash = "#/s/" + sid; };
   const chips = (probs, m) => { const ok = !probs.length;
     qcBox.innerHTML = (ok ? `<span class="chip ok">Netteté et lumière OK</span>` : probs.map(p => `<span class="chip bad">${esc(p)}</span>`).join("")) +
@@ -150,6 +153,7 @@ async function vCapture(sid) {
   async function send(photoBlob) {
     const f = new FormData(); f.append("photo", photoBlob, "photo.jpg");
     const note = $("#note", v).value.trim(); if (note) f.append("note", note);
+    if ($("#noeti", v).checked) { f.append("etiquette", "0"); [["d0", "debut"], ["d1", "fin"], ["rn", "run"]].forEach(([i, k]) => { const x = $("#" + i, v).value.trim(); if (x) f.append(k, x); }); }
     if (audio) f.append("audio", audio, "note." + ((audio.type.split("/")[1] || "webm").split(";")[0].replace("mp4", "m4a")));
     $("#shot", v).disabled = true; qcBox.innerHTML = `<span class="chip">Envoi…</span>`;
     try { const r = await api(`/sondages/${sid}/photos`, { method: "POST", body: f }); location.hash = "#/p/" + r.id; }

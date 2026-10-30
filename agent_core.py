@@ -331,14 +331,16 @@ def hole_id(etiquette):
     return h if re.fullmatch(r"[A-Z]{1,3}\d{1,4}[A-Z]{0,2}", h) else ""   # sinon : pas un identifiant (description, texte recopié)
 
 
-def process(name, data, note):
-    row = {"photo": name, "decision": "", "drapeaux": [], "infos": []}
+def process(name, data, note, etiquette=True, meta=None, qc=True):
+    """etiquette=False : photo sans étiquette (carotte seule, ruban facultatif) -> lithologie, fractures, qualité ; aucune alerte d'étiquette.
+    meta={"run":..,"debut":..,"fin":..} : profondeurs saisies par l'utilisateur quand l'étiquette est absente. qc=False : saute le contrôle de netteté (images déjà recadrées)."""
+    row = {"photo": name, "decision": "", "drapeaux": [], "infos": [], "mode": "complet" if etiquette else "carotte"}
     im = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
     if im is None:
         row["drapeaux"].append("FICHIER illisible"); row["decision"] = "NOUVELLE PHOTO"; return row
     q = quality(im); qf = quality_flags(q); row["qualite"] = q
     TRACE.append({"etape": "contrôle qualité (OpenCV)", "modele": "code", "photo": name, "resultat": qf or "OK"})
-    if qf:
+    if qf and qc:
         row["drapeaux"].append("QUALITÉ : " + ", ".join(qf)); row["decision"] = "NOUVELLE PHOTO"; return row
     uri = data_uri(im)
     with ThreadPoolExecutor(2) as ex:
@@ -358,7 +360,7 @@ def process(name, data, note):
                 "conf_min": min([i["confiance"] for i in a["intervalles"]] or [0]),
                 "incertitudes": a["incertitudes"]})
     douteux = bool(re.search(r"(?i)incertain|illisible|possible|\?|\[", row["etiquette"] or ""))   # un crochet = annotation du modèle : une vraie étiquette n'en contient pas   # le modèle a lui-même signalé un doute (p44 : « PH-0160 [caractère final incertain] »)
-    if not row["trou"] or (douteux and USE_SAM):   # transcription ratée ou douteuse -> relecture ciblée de l'étiquette (outil), 1 seule fois
+    if etiquette and (not row["trou"] or (douteux and USE_SAM)):   # transcription ratée ou douteuse -> relecture ciblée de l'étiquette (outil), 1 seule fois
         cu = label_crop_uri(uri, f"SAM étiquette ({name})")
         t2 = read_label(cu or uri, f"relecture étiquette ({name})" + (" sur recadrage SAM" if cu else ""))
         if cu and not (t2 and hole_id(t2)): t2 = read_label(uri, f"relecture étiquette plein cadre ({name})")
@@ -375,6 +377,13 @@ def process(name, data, note):
             row[k] = v
     MAP = {"run": "run", "debut": "profondeur_debut_m", "fin": "profondeur_fin_m", "foree_m": "longueur_foree_m", "recup_m": "recuperation_m"}
     for k, ka in MAP.items(): a[ka] = row[k]
+    if meta:   # profondeurs saisies par l'utilisateur (photo sans étiquette lisible)
+        for k in ("run", "debut", "fin"):
+            if meta.get(k) is not None: row[k] = meta[k]; a[MAP[k]] = meta[k]
+        row["infos"].append("profondeurs saisies par l'utilisateur, non lues sur la photo")
+    elif not etiquette:
+        for k in ("run", "debut", "fin", "foree_m", "recup_m"): row[k] = -1
+        row["infos"].append("photo sans étiquette : profondeurs non lues")
     tg, td = a["tape_gauche_cm"], a["tape_droite_cm"]   # longueur visible : calculée par le code depuis le ruban
     if tg >= 0 and td > tg:
         calc = round((td - tg) / 100, 2)
@@ -385,9 +394,9 @@ def process(name, data, note):
         row["visible_m"] = -1
     if row["fractures"] > 15: row["drapeaux"].append(f"MESURE instable : {row['fractures']} fractures annoncées sur ~1 m, à recompter")
     label_ko = row["run"] == -1 or row["debut"] < 0 or row["fin"] < 0
-    if label_ko: row["drapeaux"].append("ÉTIQUETTE illisible (principal)")
-    if not row["trou"]: row["drapeaux"].append("ÉTIQUETTE : texte non transcrit (identifiant de forage introuvable), chiffres à vérifier")
-    if not label_ko and a["longueur_foree_m"] >= 0:
+    if label_ko and etiquette: row["drapeaux"].append("ÉTIQUETTE illisible (principal)")
+    if not row["trou"] and etiquette: row["drapeaux"].append("ÉTIQUETTE : texte non transcrit (identifiant de forage introuvable), chiffres à vérifier")
+    if etiquette and not label_ko and a["longueur_foree_m"] >= 0:
         L = row["fin"] - row["debut"]
         if abs(a["longueur_foree_m"] - L) > 0.05:
             corrige = False
@@ -470,7 +479,7 @@ def process(name, data, note):
         same_lab = (a["run"] == b["run"] and abs(a["profondeur_debut_m"] - b["profondeur_debut_m"]) < 0.05
                     and abs(a["profondeur_fin_m"] - b["profondeur_fin_m"]) < 0.05
                     and abs(a["recuperation_m"] - b["recuperation_m"]) < 0.05)
-        if not same_lab and not cu_core:
+        if not same_lab and not cu_core and etiquette:
             row["drapeaux"].append(f"DÉSACCORD étiquette : run {a['run']} {a['profondeur_debut_m']}-{a['profondeur_fin_m']} / run {b['run']} {b['profondeur_debut_m']}-{b['profondeur_fin_m']}")
     if note and NOTE_CHECK == "code":
         lp = {i["lithologie"] for r_ in ([a, b, cc] if b is not None else [a]) if r_ for i in r_["intervalles"]}
@@ -483,9 +492,9 @@ def process(name, data, note):
     return row
 
 
-def safe_process(name, data, note):
+def safe_process(name, data, note, etiquette=True, meta=None, qc=True):
     try:
-        return process(name, data, note)
+        return process(name, data, note, etiquette, meta, qc)
     except Exception as e:
         return {"photo": name, "decision": "À VALIDER", "drapeaux": [f"ERREUR : {str(e)[:150]}"], "infos": []}
 

@@ -694,5 +694,29 @@
 [
 " \\(testé\\)$",
 ""
+],
+[
+"^Photo sans étiquette \\(carotte seule\\)$",
+"Photo without label (core only)"
+],
+[
+"^Début \\(m\\)$",
+"Start (m)"
+],
+[
+"^Fin \\(m\\)$",
+"End (m)"
+],
+[
+"^Carotte seule$",
+"Core only"
+],
+[
+"profondeurs saisies par l'utilisateur, non lues sur la photo",
+"depths entered by the user, not read from the photo"
+],
+[
+"photo sans étiquette : profondeurs non lues",
+"photo without label: depths not read"
 ]
 ]

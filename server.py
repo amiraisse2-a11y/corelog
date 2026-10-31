@@ -128,7 +128,7 @@ def _run(pid, audio):
             _on_trace({"etape": "transcription impossible", "modele": "muse-voice-transcribe-1.0", "erreur": str(e)[:150]})
     data = (DATA / "img" / r["fichier"]).read_bytes()
     o = json.loads(r["opts"] or "{}")
-    row = A.safe_process(r["fichier"], data, note, etiquette=o.get("etiquette", True), meta=o.get("meta"))
+    row = A.safe_process(r["fichier"], data, note, etiquette=o.get("etiquette", True), meta=o.get("meta"), domaine=o.get("domaine"))
     cout = sum(t.get("cout_usd", 0) for t in list(A.TRACE)[n0:])
     q("UPDATE photos SET statut='terminé', row=?, cout=?, duree=? WHERE id=?", j(row), round(cout, 4), round(time.time() - t0, 1), pid)
 
@@ -234,6 +234,8 @@ async def photo_add(request):
     (DATA / "img" / fichier).write_bytes(cv2.imencode(".jpg", im, [cv2.IMWRITE_JPEG_QUALITY, 92])[1].tobytes())
     note = (form.get("note") or "").strip()[:2000] or None
     opts = {"etiquette": str(form.get("etiquette", "1")) != "0"}
+    dm = str(form.get("domaine", "auto"))
+    opts["domaine"] = dm if dm in ("sedimentary", "crystalline") else "auto"
     meta = {}
     for k, cast in (("run", int), ("debut", float), ("fin", float)):
         try: meta[k] = cast(str(form.get(k)).replace(",", ".")) if form.get(k) not in (None, "") else None

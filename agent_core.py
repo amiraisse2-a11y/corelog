@@ -143,16 +143,40 @@ SCHEMA = {"type": "object", "additionalProperties": False,
                     "confiance": {"type": "number", "description": "Confidence between 0 and 1"}}}},
   "fractures_estimees": {"type": "integer"},
   "incertitudes": {"type": "string"}}}
-SYSTEM_EXTRACT = (
+def _system(regles):
+    return (
   "You are a field geology assistant. You receive ONE photo of a drill core tray with a handwritten label, "
   "a tape measure and colour scales. Describe only what is visible. Read the label exactly "
   "(first line = borehole ID, last line = 'drilled length / recovered length' in metres). Never invent values: use -1 for unreadable numbers. "
   "Use 'unknown' only if the core is truly not visible; otherwise give your best lithology with a lower "
   "confidence. Wet glare alone is not a reason for 'unknown'. "
-  + DOMAIN["regles_prompt"] +
+  + regles +
   "Report the tape readings (cm) at the left and right edge of the core. "
   "Left of the photo is usually shallower. Confidence values are between 0 and 1. "
   "Write descriptions in French.")
+SYSTEM_EXTRACT = _system(DOMAIN["regles_prompt"])
+
+
+# Domaine choisi PAR PHOTO (sedimentary | crystalline | auto) : restreint la liste des roches et les règles données au modèle.
+import contextvars, copy
+_CUR = contextvars.ContextVar("domaine", default=DOMAIN_ID)
+_CTX = {}
+def _ctx(d):
+    if d not in ("sedimentary", "crystalline"): d = "auto" if DOMAIN_ID == "auto" or d == "auto" else DOMAIN_ID
+    if d not in _CTX:
+        if d == "auto" and DOMAIN_ID == "auto": dom = DOMAIN
+        elif d == "auto":
+            _s, _c = _charge("sedimentary"), _charge("crystalline"); _v = set(); _l = []
+            for l in _s["lithologies"] + _c["lithologies"]:
+                if l["id"] not in _v: _v.add(l["id"]); _l.append(l)
+            dom = {"lithologies": _l, "regles_prompt": "First decide whether the core is sedimentary or crystalline/structural, then choose only within the matching rock types; if you cannot decide, use 'unknown'.\n\nSEDIMENTARY RULES:\n" + _s["regles_prompt"] + "\n\nCRYSTALLINE AND STRUCTURAL RULES:\n" + _c["regles_prompt"]}
+        else: dom = _charge(d)
+        litho = [l["id"] for l in dom["lithologies"]]
+        sch = copy.deepcopy(SCHEMA); sch["properties"]["intervalles"]["items"]["properties"]["lithologie"]["enum"] = litho
+        _CTX[d] = {"id": d, "litho": litho, "schema": sch, "system": _system(dom["regles_prompt"])}
+    return _CTX[d]
+
+
 SCHEMA_NOTE = {"type": "object", "additionalProperties": False, "required": ["coherent", "action", "raison"],
   "properties": {"coherent": {"type": "boolean"},
                  "action": {"type": "string", "enum": ["valider", "demander_confirmation", "demander_nouvelle_photo"]},
@@ -187,10 +211,11 @@ def data_uri(im, side=1600):
 
 
 def extract(model, step, uri, hint=""):
-    msgs = [{"role": "system", "content": SYSTEM_EXTRACT},
+    c = _ctx(_CUR.get())
+    msgs = [{"role": "system", "content": c["system"]},
             {"role": "user", "content": [{"type": "text", "text": "Extract the log for this core photo." + hint},
                                          {"type": "image_url", "image_url": {"url": uri}}]}]
-    return call(model, step, msgs, "extraction", SCHEMA)
+    return call(model, step, msgs, "extraction", c["schema"])
 
 
 def check_note(uri, note):
@@ -203,6 +228,9 @@ def check_note(uri, note):
 # ---------- Contrôle note / photo par le code ----------
 # Le modèle lit la photo ; le code lit la note (mots-clés) et compare les familles de lithologie.
 NOTE_LEX = [(p, l) for p, l in DOMAIN["lexique_note"]]
+if DOMAIN_ID != "auto":   # la note est toujours lue avec les deux vocabulaires, pour détecter une roche hors du domaine choisi
+    _o = [x for x in ("sedimentary", "crystalline") if x != DOMAIN_ID]
+    NOTE_LEX = NOTE_LEX + [(p, l) for x in _o for p, l in _charge(x)["lexique_note"]]
 NOMBRES = {"un": 1, "une": 1, "deux": 2, "trois": 3, "quatre": 4, "cinq": 5, "six": 6, "sept": 7, "huit": 8, "neuf": 9, "dix": 10}
 
 
@@ -223,12 +251,16 @@ def note_fractures(note):
 
 def check_note_code(note, lithos_photo, fractures):
     """Retourne (drapeaux, infos)."""
-    fam_note = {COARSE[l] for l in note_lithos(note)}
+    dom = _ctx(_CUR.get()); nl = note_lithos(note)
+    if dom["id"] == "crystalline": nl = {("schist" if l == "shale" else l) for l in nl}   # « schiste » dit en langage courant pour un schiste cristallin
+    hors = sorted(l for l in nl if l not in dom["litho"]) if dom["id"] != "auto" else []
+    fam_note = {COARSE[l] for l in nl}
     fam_photo = {COARSE[l] for l in lithos_photo if l != "unknown"}
     drap, infos = [], []
     if not fam_note: infos.append("note : aucune lithologie reconnue, non comparée")
     elif fam_photo and not (fam_note & fam_photo):
         drap.append(f"NOTE incohérente avec la photo : la note parle de {sorted(fam_note)}, la lecture de la photo donne {sorted(fam_photo)}")
+    if hors: drap.append(f"NOTE hors du domaine choisi ({dom['id']}) : la note évoque {hors}")
     nf = note_fractures(note)
     if nf is not None and fractures >= 0 and abs(nf - fractures) > 2:
         infos.append(f"note : {nf} fracture(s) ; lecture de la photo : {fractures} (comptage peu fiable)")
@@ -345,7 +377,7 @@ def hole_id(etiquette):
     return h if re.fullmatch(r"[A-Z]{1,3}\d{1,4}[A-Z]{0,2}", h) else ""   # sinon : pas un identifiant (description, texte recopié)
 
 
-def process(name, data, note, etiquette=True, meta=None, qc=True):
+def _process(name, data, note, etiquette=True, meta=None, qc=True):
     """etiquette=False : photo sans étiquette (carotte seule, ruban facultatif) -> lithologie, fractures, qualité ; aucune alerte d'étiquette.
     meta={"run":..,"debut":..,"fin":..} : profondeurs saisies par l'utilisateur quand l'étiquette est absente. qc=False : saute le contrôle de netteté (images déjà recadrées)."""
     row = {"photo": name, "decision": "", "drapeaux": [], "infos": [], "mode": "complet" if etiquette else "carotte"}
@@ -358,7 +390,7 @@ def process(name, data, note, etiquette=True, meta=None, qc=True):
         row["drapeaux"].append("QUALITÉ : " + ", ".join(qf)); row["decision"] = "NOUVELLE PHOTO"; return row
     uri = data_uri(im)
     with ThreadPoolExecutor(2) as ex:
-        fa = ex.submit(extract, PRIMARY, f"extraction principale ({name})", uri)
+        fa = ex.submit(contextvars.copy_context().run, extract, PRIMARY, f"extraction principale ({name})", uri)
         fn = ex.submit(check_note, uri, note) if (note and NOTE_CHECK == "modele") else None
         a, n = fa.result(), (fn.result() if fn else None)
     if a is None:
@@ -506,9 +538,16 @@ def process(name, data, note, etiquette=True, meta=None, qc=True):
     return row
 
 
-def safe_process(name, data, note, etiquette=True, meta=None, qc=True):
+def process(name, data, note, etiquette=True, meta=None, qc=True, domaine=None):
+    tok = _CUR.set(_ctx(domaine or DOMAIN_ID)["id"])
     try:
-        return process(name, data, note, etiquette, meta, qc)
+        row = _process(name, data, note, etiquette, meta, qc); row["domaine"] = _CUR.get(); return row
+    finally: _CUR.reset(tok)
+
+
+def safe_process(name, data, note, etiquette=True, meta=None, qc=True, domaine=None):
+    try:
+        return process(name, data, note, etiquette, meta, qc, domaine)
     except Exception as e:
         return {"photo": name, "decision": "À VALIDER", "drapeaux": [f"ERREUR : {str(e)[:150]}"], "infos": []}
 

@@ -26,6 +26,7 @@ BASE = Path(__file__).parent
 DATA = Path(os.environ.get("DATA_DIR", BASE / "data")); (DATA / "img").mkdir(parents=True, exist_ok=True)
 TOKEN = os.environ.get("CORELOG_TOKEN", "")
 DEMO_TOKENS = [t.strip() for t in os.environ.get("CORELOG_DEMO_TOKENS", "").split(",") if t.strip()]
+GROUPES = {g: [l["id"] for l in A._charge(g)["lithologies"]] for g in ("sedimentary", "crystalline")}
 DEMO_MAX_PHOTOS = int(os.environ.get("DEMO_MAX_PHOTOS", "40"))
 PROTEGE = bool(TOKEN or DEMO_TOKENS)
 MAX_UPLOAD = 25 * 1024 * 1024
@@ -344,12 +345,12 @@ async def sondage_delete(request):
 
 async def config(request):
     if request.state.role != "admin":   # le testeur de démonstration ne voit ni l'architecture ni l'état des modèles
-        return JSONResponse({"role": "demo", "lithologies": list(A.LITHO), "domaine": {"id": A.DOMAIN_ID, "nom": A.DOMAIN["nom"], "statut": A.DOMAIN["statut"], "lithologies": A.DOMAIN["lithologies"]}})
+        return JSONResponse({"role": "demo", "lithologies": list(A.LITHO), "domaine": {"id": A.DOMAIN_ID, "nom": A.DOMAIN["nom"], "statut": A.DOMAIN["statut"], "lithologies": A.DOMAIN["lithologies"], "groupes": GROUPES}})
     """État du serveur pour l'écran Architecture : quels modèles sont branchés (jamais les clés)."""
     return JSONResponse({"modeles": {"muse-spark-open": bool(A.SPARK_OPEN_KEY), "sam-3.1": bool(A.KEY and A.USE_SAM), "muse-voice-transcribe": bool(A.KEY),
                                       "glimmer": bool(A.GLIMMER_URL)},
                          "lithologies": list(A.LITHO), "role": "admin", "acces_protege": PROTEGE, "file": JOBS.qsize(),
-                         "domaine": {"id": A.DOMAIN_ID, "nom": A.DOMAIN["nom"], "statut": A.DOMAIN["statut"], "lithologies": A.DOMAIN["lithologies"]}})
+                         "domaine": {"id": A.DOMAIN_ID, "nom": A.DOMAIN["nom"], "statut": A.DOMAIN["statut"], "lithologies": A.DOMAIN["lithologies"], "groupes": GROUPES}})
 
 
 async def health(request): return JSONResponse({"ok": True})

@@ -234,9 +234,14 @@ async function vPhoto(pid) {
   <button class="ghost full" id="del" style="margin-top:6px">Supprimer cette photo</button>`}`;
   if (retake) { $("#retry").onclick = async () => { await api(`/photos/${pid}/retry`, { method: "POST" }); route(); };
     const a = $("#again"); if (a) a.onclick = async () => { try { await api("/photos/" + pid, { method: "DELETE" }); } catch { } }; return; }
-  const drawL = () => { $("#lits").innerHTML = Object.keys(LITHO).filter(k => k !== "unknown" || sel.has(k) || lit.includes(k))
-      .map(k => `<button class="chip ${sel.has(k) ? "on" : ""}" data-k="${k}"><span class="dot" style="background:${lcol(k)}"></span>${esc(lname(k))}${lit.includes(k) ? " ·" : ""}</button>`).join("");
-    document.querySelectorAll("#lits button").forEach(b => b.onclick = () => { sel.has(b.dataset.k) ? sel.delete(b.dataset.k) : sel.add(b.dataset.k); drawL(); });
+  let tout = false;
+  const drawL = () => { const G = (DOMAINE && DOMAINE.groupes) || {}, dm = r.domaine, ids = Object.keys(LITHO);
+    const base = G[dm] ? new Set([...G[dm], ...sel, ...lit]) : null;
+    const show = k => (k !== "unknown" || sel.has(k) || lit.includes(k)) && (tout || !base || base.has(k));
+    const chip = k => `<button class="chip ${sel.has(k) ? "on" : ""}" data-k="${k}"><span class="dot" style="background:${lcol(k)}"></span>${esc(lname(k))}${lit.includes(k) ? " ·" : ""}</button>`;
+    $("#lits").innerHTML = ids.filter(show).map(chip).join("") + (base ? `<button class="chip" id="allr" style="border-style:dashed">${tout ? "Moins de roches" : "Autres roches…"}</button>` : "");
+    const ar = $("#allr"); if (ar) ar.onclick = () => { tout = !tout; drawL(); };
+    document.querySelectorAll("#lits button[data-k]").forEach(b => b.onclick = () => { sel.has(b.dataset.k) ? sel.delete(b.dataset.k) : sel.add(b.dataset.k); drawL(); });
     $("#fr").textContent = fr; };
   drawL();
   $("#m").onclick = () => { fr = Math.max(0, fr - 1); drawL(); }; $("#pl").onclick = () => { fr++; drawL(); };

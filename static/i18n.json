@@ -734,5 +734,13 @@
 [
 "NOTE hors du domaine choisi \\((\\w+)\\) : la note évoque (.*)",
 "NOTE outside the chosen domain ($1): the note mentions $2"
+],
+[
+"Type de roche",
+"Rock type"
+],
+[
+"Cristallin",
+"Crystalline"
 ]
 ]

@@ -16,4 +16,4 @@ services:
       - key: GLIMMER_KEY
         sync: false
       - key: CORELOG_DOMAIN
-        value: sedimentary
+        value: auto

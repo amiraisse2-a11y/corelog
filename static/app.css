@@ -65,3 +65,41 @@ nav#tabs svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1
 .arch .node{border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px}
 .arch .node b{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .arch .arrow{text-align:center;color:var(--mut);font-size:13px;margin:-2px 0 6px}
+
+/* ---------- Finition visuelle ---------- */
+:root{--sh:0 1px 2px rgba(20,32,26,.05),0 6px 18px rgba(20,32,26,.06)}
+body{background:linear-gradient(180deg,#EEF2EC 0,#F2F3EF 260px)}
+h1{font-size:26px;letter-spacing:-.01em;margin:4px 0 16px}
+h2{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:22px 0 8px}
+.mono{display:inline-flex;align-items:center;gap:8px;color:var(--g);font-weight:500}
+.mono::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--g);box-shadow:5px 5px 0 -1px #8DBFA7}
+.card{border-radius:16px;box-shadow:var(--sh);border-color:#E3E7DF;padding:16px}
+a.card.link{position:relative;padding-right:40px;transition:transform .12s ease,box-shadow .12s ease}
+a.card.link::after{content:"";position:absolute;right:18px;top:50%;width:8px;height:8px;border-top:2px solid #9AA59E;border-right:2px solid #9AA59E;transform:translateY(-50%) rotate(45deg)}
+a.card.link:active{transform:scale(.99)}
+button,.btn{border-radius:14px;box-shadow:0 1px 2px rgba(20,32,26,.12)}
+button.sec,.btn.sec{box-shadow:none;border-color:#BFD6C9}
+.chip{border-radius:999px;font-weight:600;letter-spacing:.005em}
+input[type=text],input[type=password],textarea{border-radius:14px;border-color:#D5D9D1;box-shadow:inset 0 1px 2px rgba(20,32,26,.04)}
+input:focus,textarea:focus{outline:2px solid #8DBFA7;outline-offset:1px}
+nav#tabs{box-shadow:0 -4px 18px rgba(20,32,26,.06);border-top:0}
+nav#tabs a.on{position:relative}
+nav#tabs a.on::before{content:"";position:absolute;top:0;width:28px;height:3px;border-radius:0 0 3px 3px;background:var(--g)}
+#lang{box-shadow:var(--sh);border:1px solid #D5D9D1!important;font-weight:600}
+.kv{gap:14px 18px}
+.kv span{font-size:19px}
+ul.flags li{border-radius:12px;border:1px solid #EBC5A3}
+ul.flags li.info{border-color:#E3E7DF}
+.step .ic{width:22px;height:22px}
+.thumb{border-radius:16px;box-shadow:var(--sh)}
+.strip{border-radius:16px;box-shadow:var(--sh)}
+.arch .node{border-radius:16px;box-shadow:var(--sh)}
+
+/* Choix du type de roche : contrôle segmenté sur une ligne */
+#cam #dom{display:grid;grid-template-columns:1.15fr 1.15fr 1fr;gap:0;background:rgba(255,255,255,.1);border-radius:14px;padding:3px}
+#cam #dom button.chip{min-height:38px;padding:0 6px;border:0;border-radius:11px;background:transparent;color:#cfd6d1;font-size:13px;font-weight:600;box-shadow:none;justify-content:center}
+#cam #dom button.chip.on{background:#fff;color:var(--g);box-shadow:0 1px 3px rgba(0,0,0,.35)}
+#cam .domlbl{font:500 11px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#9fb3a8;margin:2px 2px -4px}
+#cam .bar{border-radius:20px 20px 0 0;backdrop-filter:blur(6px)}
+#cam .top .chip{box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.shutter{box-shadow:inset 0 0 0 4px #000,0 0 0 3px rgba(255,255,255,.25)}

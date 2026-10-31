@@ -129,7 +129,7 @@ async function vCapture(sid) {
   <div class="bar">
     <textarea id="note" placeholder="Note écrite (facultatif) : lithologie, nombre de fractures…" style="min-height:44px;height:44px;font-size:14px"></textarea>
     <div id="recinfo" class="mut" style="color:#cfd6d1" hidden></div>
-    <div id="dom" class="chips" style="gap:6px"><button class="chip on" data-d="auto">Je ne sais pas</button><button class="chip" data-d="sedimentary">Sédimentaire</button><button class="chip" data-d="crystalline">Cristallin / structural</button></div>
+    <div class="domlbl">Type de roche</div><div id="dom"><button class="chip on" data-d="auto">Je ne sais pas</button><button class="chip" data-d="sedimentary">Sédimentaire</button><button class="chip" data-d="crystalline" title="Cristallin / structural">Cristallin</button></div>
     <label style="display:flex;gap:8px;align-items:center;color:#cfd6d1;margin:0;font-size:13px"><input type="checkbox" id="noeti"> Photo sans étiquette (carotte seule)</label>
     <div id="depths" style="display:none;gap:6px"><input id="d0" type="text" inputmode="decimal" placeholder="Début (m)" style="padding:8px;font-size:14px"><input id="d1" type="text" inputmode="decimal" placeholder="Fin (m)" style="padding:8px;font-size:14px"><input id="rn" type="text" inputmode="numeric" placeholder="Run" style="padding:8px;font-size:14px"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">

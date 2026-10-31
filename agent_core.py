@@ -118,8 +118,17 @@ if DOMAIN_ID == "auto":   # fusion : l'agent choisit lui-même entre roches séd
               "lexique_note": _c["lexique_note"] + _s["lexique_note"]}   # termes cristallins d'abord (micaschiste avant schiste)
 else:
     DOMAIN = _charge(DOMAIN_ID)
-LITHO = [l["id"] for l in DOMAIN["lithologies"]]
-COARSE = {l["id"]: l["famille"] for l in DOMAIN["lithologies"]}
+# Listes globales = TOUS les types de roches (quel que soit le domaine par défaut du serveur) : le domaine choisi par photo
+# restreint ce que voit le modèle (voir _ctx), mais la validation, les exports et les contrôles doivent connaître toutes les roches.
+_tous, _vus2 = [], set()
+for _n in ("sedimentary", "crystalline"):
+    for _l in _charge(_n)["lithologies"]:
+        if _l["id"] not in _vus2: _vus2.add(_l["id"]); _tous.append(_l)
+for _l in DOMAIN["lithologies"]:
+    if _l["id"] not in _vus2: _vus2.add(_l["id"]); _tous.append(_l)
+DOMAIN["lithologies"] = _tous
+LITHO = [l["id"] for l in _tous]
+COARSE = {l["id"]: l["famille"] for l in _tous}
 assert "unknown" in LITHO and "other" in LITHO, "un domaine doit contenir « other » et « unknown »"
 SCHEMA = {"type": "object", "additionalProperties": False,
  "required": ["etiquette_lue", "run", "profondeur_debut_m", "profondeur_fin_m", "longueur_foree_m", "recuperation_m",

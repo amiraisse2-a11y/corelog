@@ -100,10 +100,24 @@ def quality_flags(q):
 
 
 # ---------- 2) Appels de modèles (avec trace d'orchestration) ----------
-# Le « domaine » (jeu de lithologies, règles de description, lexique des notes) est un fichier de domains/ : CORELOG_DOMAIN=sedimentary|crystalline.
+# Le « domaine » (jeu de lithologies, règles de description, lexique des notes) est un fichier de domains/ : CORELOG_DOMAIN=auto|sedimentary|crystalline.
 # Le reste de l'agent (contrôle qualité, étiquette, ruban, vote, contrôles par le code) ne dépend pas du type de roche.
-DOMAIN_ID = os.environ.get("CORELOG_DOMAIN", "sedimentary")
-DOMAIN = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "domains", DOMAIN_ID + ".json"), encoding="utf-8"))
+DOMAIN_ID = os.environ.get("CORELOG_DOMAIN", "auto")
+_DD = os.path.join(os.path.dirname(os.path.abspath(__file__)), "domains")
+def _charge(i): return json.load(open(os.path.join(_DD, i + ".json"), encoding="utf-8"))
+if DOMAIN_ID == "auto":   # fusion : l'agent choisit lui-même entre roches sédimentaires et cristallines/structurales
+    _s, _c = _charge("sedimentary"), _charge("crystalline")
+    _vus = set(); _lit = []
+    for l in _s["lithologies"] + _c["lithologies"]:
+        if l["id"] not in _vus: _vus.add(l["id"]); _lit.append(l)
+    DOMAIN = {"id": "auto", "nom": {"fr": "Auto : sédimentaire + socle/structural", "en": "Auto: sedimentary + crystalline/structural"},
+              "statut": "sédimentaire testé sur 10 photos réelles ; socle et structural NON TESTÉS",
+              "lithologies": _lit,
+              "regles_prompt": "First decide whether the core is sedimentary (layered, grains cemented, clay, carbonate) or crystalline/structural (interlocking crystals, foliation, fault rock), then choose only within the matching rock types. If you cannot decide between the two groups, use 'unknown'.\n\n"
+                               + "SEDIMENTARY RULES:\n" + _s["regles_prompt"] + "\n\nCRYSTALLINE AND STRUCTURAL RULES:\n" + _c["regles_prompt"],
+              "lexique_note": _c["lexique_note"] + _s["lexique_note"]}   # termes cristallins d'abord (micaschiste avant schiste)
+else:
+    DOMAIN = _charge(DOMAIN_ID)
 LITHO = [l["id"] for l in DOMAIN["lithologies"]]
 COARSE = {l["id"]: l["famille"] for l in DOMAIN["lithologies"]}
 assert "unknown" in LITHO and "other" in LITHO, "un domaine doit contenir « other » et « unknown »"

@@ -1,5 +1,5 @@
 // Coque de l'application en cache ; l'API passe toujours par le réseau (aucune analyse hors ligne).
-const V = "corelog-v4", SHELL = ["/", "/app.css", "/app.js", "/manifest.webmanifest", "/icon-192.png", "/i18n.json"];
+const V = "corelog-v5", SHELL = ["/", "/app.css", "/app.js", "/manifest.webmanifest", "/icon-192.png", "/i18n.json"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(V).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== V).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener("fetch", e => {

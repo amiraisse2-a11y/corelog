@@ -261,6 +261,8 @@ def note_fractures(note):
 def check_note_code(note, lithos_photo, fractures):
     """Retourne (drapeaux, infos)."""
     dom = _ctx(_CUR.get()); nl = note_lithos(note)
+    _fr = {l["id"]: l["fr"].split(",")[0] for l in DOMAIN["lithologies"]}
+    nom = lambda ids: ", ".join(sorted(_fr.get(i, i) for i in ids)) or "—"
     if dom["id"] == "crystalline": nl = {("schist" if l == "shale" else l) for l in nl}   # « schiste » dit en langage courant pour un schiste cristallin
     hors = sorted(l for l in nl if l not in dom["litho"]) if dom["id"] != "auto" else []
     fam_note = {COARSE[l] for l in nl}
@@ -268,8 +270,8 @@ def check_note_code(note, lithos_photo, fractures):
     drap, infos = [], []
     if not fam_note: infos.append("note : aucune lithologie reconnue, non comparée")
     elif fam_photo and not (fam_note & fam_photo):
-        drap.append(f"NOTE incohérente avec la photo : la note parle de {sorted(fam_note)}, la lecture de la photo donne {sorted(fam_photo)}")
-    if hors: drap.append(f"NOTE hors du domaine choisi ({dom['id']}) : la note évoque {hors}")
+        drap.append(f"NOTE incohérente avec la photo : la note parle de {nom(nl)}, la lecture de la photo donne {nom(l for l in lithos_photo if l != 'unknown')}")
+    if hors: drap.append(f"NOTE hors du domaine choisi ({dom['id']}) : la note évoque {nom(hors)}")
     nf = note_fractures(note)
     if nf is not None and fractures >= 0 and abs(nf - fractures) > 2:
         infos.append(f"note : {nf} fracture(s) ; lecture de la photo : {fractures} (comptage peu fiable)")

@@ -718,5 +718,21 @@
 [
 "photo sans étiquette : profondeurs non lues",
 "photo without label: depths not read"
+],
+[
+"Je ne sais pas",
+"I don't know"
+],
+[
+"Sédimentaire",
+"Sedimentary"
+],
+[
+"Cristallin / structural",
+"Crystalline / structural"
+],
+[
+"NOTE hors du domaine choisi \\((\\w+)\\) : la note évoque (.*)",
+"NOTE outside the chosen domain ($1): the note mentions $2"
 ]
 ]

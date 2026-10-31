@@ -129,6 +129,7 @@ async function vCapture(sid) {
   <div class="bar">
     <textarea id="note" placeholder="Note écrite (facultatif) : lithologie, nombre de fractures…" style="min-height:44px;height:44px;font-size:14px"></textarea>
     <div id="recinfo" class="mut" style="color:#cfd6d1" hidden></div>
+    <div id="dom" class="chips" style="gap:6px"><button class="chip on" data-d="auto">Je ne sais pas</button><button class="chip" data-d="sedimentary">Sédimentaire</button><button class="chip" data-d="crystalline">Cristallin / structural</button></div>
     <label style="display:flex;gap:8px;align-items:center;color:#cfd6d1;margin:0;font-size:13px"><input type="checkbox" id="noeti"> Photo sans étiquette (carotte seule)</label>
     <div id="depths" style="display:none;gap:6px"><input id="d0" type="text" inputmode="decimal" placeholder="Début (m)" style="padding:8px;font-size:14px"><input id="d1" type="text" inputmode="decimal" placeholder="Fin (m)" style="padding:8px;font-size:14px"><input id="rn" type="text" inputmode="numeric" placeholder="Run" style="padding:8px;font-size:14px"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
@@ -140,6 +141,8 @@ async function vCapture(sid) {
   </div>`;
   document.body.appendChild(v);
   const vid = $("video", v), qcBox = $("#qc", v);
+  let DOM_CH = "auto";
+  v.querySelectorAll("#dom button").forEach(b => b.onclick = () => { DOM_CH = b.dataset.d; v.querySelectorAll("#dom button").forEach(x => x.classList.toggle("on", x === b)); });
   $("#noeti", v).onchange = e => { $("#depths", v).style.display = e.target.checked ? "flex" : "none"; };
   $("#close", v).onclick = () => { location.hash = "#/s/" + sid; };
   const chips = (probs, m) => { const ok = !probs.length;
@@ -152,6 +155,7 @@ async function vCapture(sid) {
     try { const r = await api("/qc", { method: "POST", body: f }); chips(r.problemes, r.mesures); return r; } catch { } };
   async function send(photoBlob) {
     const f = new FormData(); f.append("photo", photoBlob, "photo.jpg");
+    f.append("domaine", DOM_CH);
     const note = $("#note", v).value.trim(); if (note) f.append("note", note);
     if ($("#noeti", v).checked) { f.append("etiquette", "0"); [["d0", "debut"], ["d1", "fin"], ["rn", "run"]].forEach(([i, k]) => { const x = $("#" + i, v).value.trim(); if (x) f.append(k, x); }); }
     if (audio) f.append("audio", audio, "note." + ((audio.type.split("/")[1] || "webm").split(";")[0].replace("mp4", "m4a")));

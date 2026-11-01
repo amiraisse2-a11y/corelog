@@ -251,6 +251,12 @@ def note_lithos(note):
     return trouve
 
 
+def _noms(ids):
+    """Noms français lisibles (jamais de listes Python dans les messages montrés à l'utilisateur)."""
+    fr = {l["id"]: re.sub(r"\s*\(.*\)", "", l["fr"]).split(",")[0] for l in DOMAIN["lithologies"]}
+    return ", ".join(fr.get(i, i) for i in ids) or "—"
+
+
 def note_fractures(note):
     t = (note or "").lower()
     if re.search(r"(aucune|z[ée]ro|pas\s+de|sans)\s+(aucune\s+)?fractur", t): return 0
@@ -261,7 +267,7 @@ def note_fractures(note):
 def check_note_code(note, lithos_photo, fractures):
     """Retourne (drapeaux, infos)."""
     dom = _ctx(_CUR.get()); nl = note_lithos(note)
-    _fr = {l["id"]: l["fr"].split(",")[0] for l in DOMAIN["lithologies"]}
+    _fr = {l["id"]: re.sub(r"\s*\(.*\)", "", l["fr"]).split(",")[0] for l in DOMAIN["lithologies"]}
     nom = lambda ids: ", ".join(sorted(_fr.get(i, i) for i in ids)) or "—"
     if dom["id"] == "crystalline": nl = {("schist" if l == "shale" else l) for l in nl}   # « schiste » dit en langage courant pour un schiste cristallin
     hors = sorted(l for l in nl if l not in dom["litho"]) if dom["id"] != "auto" else []
@@ -509,10 +515,10 @@ def _process(name, data, note, etiquette=True, meta=None, qc=True):
             sets = [x for x in ({f(i["lithologie"]) for i in r_["intervalles"]} - {"unknown", "inconnu"} for r_ in reads) if x]
             cnt = Counter(l for x in sets for l in x)
             final = sorted(l for l, c in cnt.items() if c > len(sets) / 2)
-            lecture = " / ".join(str(sorted(x)) for x in sets)
+            lecture = " / ".join(_noms(sorted(x)) for x in sets)
             nom = "INSTABILITÉ : lectures du même modèle" if SELF else "DÉSACCORD lithologie"
             if len(sets) >= 3 and final:
-                row["drapeaux"].append(f"{nom} {lecture} → vote {final} ({max(cnt[l] for l in final)}/{len(sets)}), à confirmer")
+                row["drapeaux"].append(f"{nom} {lecture} → vote {_noms(final)} ({max(cnt[l] for l in final)}/{len(sets)}), à confirmer")
                 if SELF: row["lithologies"] = final   # la lithologie proposée à l'humain est le vote, pas la 1re lecture
             else:
                 row["drapeaux"].append(f"{nom} : {lecture}, aucune majorité")
@@ -532,7 +538,7 @@ def _process(name, data, note, etiquette=True, meta=None, qc=True):
                 proches = sum(1 for v in fr if abs(v - row["fractures"]) <= 2)
                 if fr[-1] - fr[0] > 4 and proches < 2: row["drapeaux"].append(f"MESURE instable : fractures lues {fr}, médiane {row['fractures']} retenue")
         if cb and set(row["lithologies"]) != set(row["second_lithos"]):
-            row["infos"].append(f"nuance lithologique : principal {row['lithologies']} / second avis {row['second_lithos']}")
+            row["infos"].append(f"nuance lithologique : principal {_noms(row['lithologies'])} / second avis {_noms(row['second_lithos'])}")
         same_lab = (a["run"] == b["run"] and abs(a["profondeur_debut_m"] - b["profondeur_debut_m"]) < 0.05
                     and abs(a["profondeur_fin_m"] - b["profondeur_fin_m"]) < 0.05
                     and abs(a["recuperation_m"] - b["recuperation_m"]) < 0.05)

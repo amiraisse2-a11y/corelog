@@ -96,11 +96,11 @@
    "granite"
   ],
   [
-   "gabbro|basalt\\w*|d[ée]ol?rit\\w*|diabase",
+   "gab+r\\w*|basalt\\w*|d[ée]ol?rit\\w*|diabase",
    "gabbro_basalt"
   ],
   [
-   "gneiss\\w*",
+   "gn[ae][iï]?ss?\\w*|(?<![a-zà-ÿ])ni[eè]ces?(?![a-zà-ÿ])",
    "gneiss"
   ],
   [

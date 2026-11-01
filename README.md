@@ -54,3 +54,8 @@ Une fois le serveur déployé avec ses clés : `python live_test.py https://ton-
 - Glimmer (second avis indépendant) : pas encore hébergé ; sans lui, le second avis est le même modèle relu (auto-cohérence).
 - Interface testée dans un navigateur de bureau, caméra simulée ; **pas testée sur un vrai téléphone**, ni les appels réels aux modèles depuis le serveur.
 - Photo max 25 Mo ; pas de comptes (un seul code d'accès partagé).
+
+
+## Modèle Baseten du hackathon
+
+L'agent appelle `meta-models/muse-spark-open-1026` (le modèle du hackathon : les crédits offerts ne couvrent que lui). Variable `BASETEN_MODEL` pour le changer.

@@ -20,15 +20,18 @@ GLIMMER_URL = os.environ.get("GLIMMER_URL", "")   # colle ici l'adresse affiché
 GLIMMER_KEY = os.environ.get("GLIMMER_KEY", "")
 
 META_URL = "https://api.meta.ai/v1"
+# Modèle du hackathon sur Baseten : c'est le seul que couvrent les crédits offerts (la clé du hackathon ne marche qu'avec lui).
+# Le modèle « meta-models/muse-spark-open » sans suffixe est facturé sur la carte bancaire. Surchargeable par BASETEN_MODEL.
+BASETEN_MODEL = os.environ.get("BASETEN_MODEL", "meta-models/muse-spark-open-1026")
 # modèle -> (adresse, clé, prix $ par million de tokens entrée/sortie)
 ENDPOINTS = {
     "muse-spark-1.3": (META_URL, KEY, (1.25, 4.25)),
     "muse-wonder-1.0": (META_URL, KEY, (4.0, 20.0)),
-    "meta-models/muse-spark-open": ("https://inference.baseten.co/v1", SPARK_OPEN_KEY, (1.25, 4.25)),
+    BASETEN_MODEL: ("https://inference.baseten.co/v1", SPARK_OPEN_KEY, (1.25, 4.25)),
     "glimmer": (GLIMMER_URL, GLIMMER_KEY, (0, 0)),   # coût réel = secondes de GPU sur Modal
 }
 if MODE == "open":
-    PRIMARY = "meta-models/muse-spark-open"
+    PRIMARY = BASETEN_MODEL
     SECOND = "glimmer" if GLIMMER_URL else PRIMARY   # sans Glimmer : 2e lecture indépendante du même modèle (auto-cohérence, ~0,02 $)
 else:
     PRIMARY, SECOND = "muse-spark-1.3", "muse-wonder-1.0"

@@ -59,3 +59,5 @@ Une fois le serveur déployé avec ses clés : `python live_test.py https://ton-
 ## Modèle Baseten du hackathon
 
 L'agent appelle `meta-models/muse-spark-open-1026` (le modèle du hackathon : les crédits offerts ne couvrent que lui). Variable `BASETEN_MODEL` pour le changer.
+
+Variable `CORELOG_MODE` : `open` (défaut, Spark Open lit deux fois), `mix` (Spark Open lit, Muse Spark 1.3 via l'API Meta fait la deuxième lecture indépendante) ou `meta` (Spark 1.3 + Muse Wonder). Comparaison sur 10 photos : profondeurs identiques dans les trois modes ; coût d'environ 0,045 $ (open), 0,042 $ (mix) et 0,125 $ (meta) par photo.

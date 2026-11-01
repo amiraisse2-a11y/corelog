@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from openai import OpenAI
 
 # ---------- Réglages ----------
-MODE = "open"         # "meta" = Spark 1.3 + Wonder (API Meta) | "open" = Spark Open sur Baseten (+ Glimmer si GLIMMER_URL est rempli)
+MODE = os.environ.get("CORELOG_MODE", "open")   # "open" = Spark Open sur Baseten, 2e lecture du même modèle (+ Glimmer si GLIMMER_URL) | "mix" = Spark Open + 2e lecteur Spark 1.3 (API Meta) | "meta" = Spark 1.3 + Wonder (API Meta)
 SECOND_AVIS = "always" # "always" (recommandé : la confiance de Spark ne signale pas les cas difficiles) | "auto" | "never"
 NOTE_CHECK = "code"    # "code" = le code compare la note à la lecture de la photo (recommandé) | "modele" = jugement du modèle (trop sévère : 9 notes sur 10 refusées)
 CONF_FLAG = 0.5        # confiance en dessous de laquelle on signale la photo
@@ -30,9 +30,9 @@ ENDPOINTS = {
     BASETEN_MODEL: ("https://inference.baseten.co/v1", SPARK_OPEN_KEY, (1.25, 4.25)),
     "glimmer": (GLIMMER_URL, GLIMMER_KEY, (0, 0)),   # coût réel = secondes de GPU sur Modal
 }
-if MODE == "open":
+if MODE in ("open", "mix"):
     PRIMARY = BASETEN_MODEL
-    SECOND = "glimmer" if GLIMMER_URL else PRIMARY   # sans Glimmer : 2e lecture indépendante du même modèle (auto-cohérence, ~0,02 $)
+    SECOND = "muse-spark-1.3" if MODE == "mix" else ("glimmer" if GLIMMER_URL else PRIMARY)   # sans Glimmer : 2e lecture indépendante du même modèle (auto-cohérence, ~0,02 $)
 else:
     PRIMARY, SECOND = "muse-spark-1.3", "muse-wonder-1.0"
 if SECOND is None: SECOND_AVIS = "never"

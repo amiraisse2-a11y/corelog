@@ -27,7 +27,7 @@ A model that names a rock from a picture is easy and unreliable. The value here 
 |---|---|---|
 | Quality gate | OpenCV (code) | Blur, light, framing; rejects unusable photos before any paid call |
 | Main reading | **Muse Spark Open** (`meta-models/muse-spark-open-1026`, Baseten) | Strict JSON: label, depths, tape, lithology intervals, fractures |
-| Second reading | **Muse Spark 1.3** (Meta API) in the default `mix` mode | Independent second opinion from a different model; a third reading breaks ties |
+| Second reading | Spark Open again (hosted demo, `open` mode) or **Muse Spark 1.3** (Meta API, `mix` mode) | `mix` gives an independent second opinion from a different model; a third reading breaks ties either way |
 | Second reading, designed | **Glimmer** (Meta, self-hosted) | Part of the designed workflow as the independent second reader (`GLIMMER_URL`); see the note below: it could not be run |
 | Label re-read | **SAM 3.1** + Spark Open | SAM finds the paper label; the code crops it and the label is re-read sharper |
 | Dictation | **Muse Voice Transcribe 1.0** | Real-time WebSocket transcription (French) |
@@ -41,7 +41,7 @@ Per photo, the user picks the rock domain: **Sedimentary** (8 classes), **Crysta
 | Model | Role | Status |
 |---|---|---|
 | Muse Spark Open | Main reader, tiebreaker | Used |
-| Muse Spark 1.3 (Meta API) | Independent second reader (`mix`, default) | Used |
+| Muse Spark 1.3 (Meta API) | Independent second reader in `mix` mode | Measured from Colab (see below). The hosted demo runs `open`: from the Render server the Meta API answered 404 for this model, although the same key worked from Colab |
 | SAM 3.1 | Finds the label for a sharper re-read. Finds label and tape on 10/10 photos. Isolating the core itself did not work (tested, disabled) | Used |
 | Muse Voice Transcribe 1.0 | Dictated note → text, compared with the photo reading | Used |
 | Muse Wonder 1.0 | Second reader of the `meta` mode, a complete alternative pipeline (Spark 1.3 reads, Wonder checks) that works without Baseten | Implemented, run on the 10-photo comparison, kept as the **fallback** if the Baseten path is unavailable; not default (about 3x the cost, no gain on depths) |
@@ -49,7 +49,7 @@ Per photo, the user picks the rock domain: **Sedimentary** (8 classes), **Crysta
 
 ### About Glimmer
 
-Glimmer is part of the intended workflow: the plan was to host it on Modal with the hackathon credits and use it as the independent second reader. The author could not activate the credits: Modal refused every payment card he tried (several cards, including virtual ones; obtaining an international card is very hard in Côte d'Ivoire). The integration is in the code and switches on when `GLIMMER_URL` is set, but it has never been run, so we make no claim about its behaviour. In the meantime the second reader is Muse Spark 1.3 (default `mix`).
+Glimmer is part of the intended workflow: the plan was to host it on Modal with the hackathon credits and use it as the independent second reader. The author could not activate the credits: Modal refused every payment card he tried (several cards, including virtual ones; obtaining an international card is very hard in Côte d'Ivoire). The integration is in the code and switches on when `GLIMMER_URL` is set, but it has never been run, so we make no claim about its behaviour. In the meantime the second reader is Spark Open itself (`open`, the hosted default) or Muse Spark 1.3 (`mix`).
 
 ## Why a vision model can read rock from pixels
 
@@ -100,7 +100,7 @@ Render (free Docker): see `render.yaml`. Keys live only in environment variables
 
 Offline tests with fake models: `PYTHONPATH=stub:. python test_server.py` (also `test_roles.py`, `test_core_only.py`, `test_domaine.py`). UI without keys: `PYTHONPATH=stub:. python dev_fake.py`. `stub/` is for tests only.
 
-Environment variables: `BASETEN_MODEL` (default `meta-models/muse-spark-open-1026`, the only model the hackathon credits cover), `CORELOG_MODE` (`mix` default, `open`, `meta`), `CORELOG_DOMAIN` (`auto` default), `GLIMMER_URL` / `GLIMMER_KEY`, `DEMO_MAX_PHOTOS` (default 40), `DATA_DIR`.
+Environment variables: `BASETEN_MODEL` (default `meta-models/muse-spark-open-1026`, the only model the hackathon credits cover), `CORELOG_MODE` (`open` default, `mix`, `meta`), `CORELOG_DOMAIN` (`auto` default), `GLIMMER_URL` / `GLIMMER_KEY`, `DEMO_MAX_PHOTOS` (default 40), `DATA_DIR`.
 
 ## Access: admin and testers
 

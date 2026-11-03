@@ -40,6 +40,7 @@ TIEBREAK = True        # 3e lecture (départage) seulement si les deux première
 SELF = SECOND == PRIMARY   # auto-cohérence : on compare les lithologies exactes (claystone ≠ shale)
 PRICE = {m: v[2] for m, v in ENDPOINTS.items()}
 _clients = {}
+_DOWN = {}   # modèle -> instant où il a répondu « introuvable » : on évite de réessayer pendant 10 minutes
 
 
 def get_client(model):
@@ -198,6 +199,8 @@ SCHEMA_NOTE = {"type": "object", "additionalProperties": False, "required": ["co
 def call(model, step, messages, name, schema):
     fmt = {"type": "json_schema", "json_schema": {"name": name, "strict": True, "schema": schema}}
     err, t0 = None, time.time()
+    if time.time() - _DOWN.get(model, 0) < 600:
+        TRACE.append({"etape": step, "modele": model, "erreur": "modèle indisponible (ignoré 10 min après un échec « introuvable »)"}); return None
     for k in range(4):
         try:
             r = get_client(model).chat.completions.create(model=model, messages=messages, response_format=fmt, max_tokens=8000 + 4000 * k)
@@ -211,6 +214,8 @@ def call(model, step, messages, name, schema):
             err = "réponse vide"
         except Exception as e:
             err = str(e)[:200]
+            if "404" in err or "not found" in err.lower():
+                _DOWN[model] = time.time(); break
         time.sleep(2 * (k + 1))
     TRACE.append({"etape": step, "modele": model, "erreur": err})
     return None
@@ -495,6 +500,9 @@ def _process(name, data, note, etiquette=True, meta=None, qc=True):
         row["infos"].append("second avis lu sur la carotte isolée par SAM (sans étiquette, ruban ni cartes de couleur)")
     else:
         b = extract(SECOND, f"second avis indépendant ({name})", uri) if besoin else None
+        if besoin and b is None and SECOND != PRIMARY:   # le second lecteur (autre modèle) est injoignable : repli sur une seconde lecture du modèle principal
+            b = extract(PRIMARY, f"second avis de repli, même modèle ({name})", uri)
+            if b is not None: row["infos"].append(f"second lecteur « {SECOND} » indisponible : seconde lecture faite par le modèle principal")
     row["second_avis"] = "oui" if besoin else "non"
     row["vue_second_avis"] = "carotte isolée (SAM)" if cu_core else "photo entière"
     if b is not None:

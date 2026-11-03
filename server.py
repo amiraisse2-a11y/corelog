@@ -348,9 +348,23 @@ async def config(request):
         return JSONResponse({"role": "demo", "lithologies": list(A.LITHO), "domaine": {"id": A.DOMAIN_ID, "nom": A.DOMAIN["nom"], "statut": A.DOMAIN["statut"], "lithologies": A.DOMAIN["lithologies"], "groupes": GROUPES}})
     """État du serveur pour l'écran Architecture : quels modèles sont branchés (jamais les clés)."""
     return JSONResponse({"modeles": {"muse-spark-open": bool(A.SPARK_OPEN_KEY), "sam-3.1": bool(A.KEY and A.USE_SAM), "muse-voice-transcribe": bool(A.KEY),
-                                      "glimmer": bool(A.GLIMMER_URL)},
+                                      "muse-spark-1.3": bool(A.KEY and A.SECOND == "muse-spark-1.3"), "glimmer": bool(A.GLIMMER_URL)}, "mode": A.MODE, "second": A.SECOND,
                          "lithologies": list(A.LITHO), "role": "admin", "acces_protege": PROTEGE, "file": JOBS.qsize(),
                          "domaine": {"id": A.DOMAIN_ID, "nom": A.DOMAIN["nom"], "statut": A.DOMAIN["statut"], "lithologies": A.DOMAIN["lithologies"], "groupes": GROUPES}})
+
+
+async def diag(request):
+    """Admin : un appel minimal à chaque modèle, pour voir tout de suite lequel répond (jamais de clé dans la réponse)."""
+    if request.state.role != "admin": return JSONResponse({"erreur": "admin"}, status_code=403)
+    import asyncio
+    def un(m):
+        try:
+            r = A.get_client(m).chat.completions.create(model=m, messages=[{"role": "user", "content": "Say OK"}], max_tokens=5)
+            return "OK : " + (r.choices[0].message.content or "")[:20]
+        except Exception as e: return "ERREUR : " + str(e)[:200]
+    ms = list(dict.fromkeys([A.PRIMARY, A.SECOND]))
+    res = {m: await asyncio.to_thread(un, m) for m in ms}
+    return JSONResponse({"mode": A.MODE, "principal": A.PRIMARY, "second": A.SECOND, "tests": res})
 
 
 async def health(request): return JSONResponse({"ok": True})
@@ -390,6 +404,7 @@ routes = [
     Route("/api/photos/{pid}/image", photo_image),
     Route("/api/photos/{pid}/validate", photo_validate, methods=["POST"]),
     Route("/api/photos/{pid}/retry", photo_retry, methods=["POST"]),
+    Route("/api/diag", diag),
     Route("/health", health),
     Mount("/", StaticFiles(directory=BASE / "static", html=True)),
 ]

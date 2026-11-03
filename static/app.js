@@ -301,6 +301,7 @@ async function vArchi() {
   <div class="node"><b>Serveur CoreLog<span class="chip ok">ici</span></b><div class="mut">API, file de travail, SQLite. Les clés restent côté serveur.</div></div><div class="arrow">↓</div>
   <div class="node"><b>OpenCV · code<span class="chip ok">code</span></b><div class="mut">Netteté, lumière, bande de carotte. Contrôles déterministes à la fin : arithmétique des étiquettes, ordre, trous, chevauchements, note contre photo.</div></div>
   <div class="node"><b>Muse Spark Open<span class="chip ${m["muse-spark-open"] ? "ok" : "warn"}">${m["muse-spark-open"] ? "branché" : "clé absente"}</span></b><div class="mut">Lit la photo en JSON strict, relit l'étiquette, départage les désaccords (vote majoritaire).</div></div>
+  <div class="node"><b>Muse Spark 1.3${st(m["muse-spark-1.3"])}</b><div class="mut">Seconde lecture indépendante (API Meta), un autre modèle que le lecteur principal. Mode : ${esc(c.mode || "—")}.</div></div>
   <div class="node"><b>SAM 3.1${st(m["sam-3.1"])}</b><div class="mut">Localise et recadre l'étiquette pour une relecture ciblée.</div></div>
   <div class="node"><b>Muse Voice Transcribe${st(m["muse-voice-transcribe"])}</b><div class="mut">Transcrit la note dictée (français).</div></div>
   <div class="node"><b>Glimmer${st(m.glimmer)}</b><div class="mut">Second avis indépendant, quand il est hébergé. Sinon : deuxième lecture du même modèle (auto-cohérence).</div></div>

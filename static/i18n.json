@@ -754,5 +754,13 @@
 [
 "note : aucune lithologie reconnue, non comparée",
 "note: no rock type recognised, not compared"
+],
+[
+"second lecteur « (.*) » indisponible : seconde lecture faite par le modèle principal",
+"second reader « $1 » unavailable: second reading done by the main model"
+],
+[
+"Seconde lecture indépendante \\(API Meta\\), un autre modèle que le lecteur principal\\. Mode : ",
+"Independent second reading (Meta API), a different model from the main reader. Mode: "
 ]
 ]

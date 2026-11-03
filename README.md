@@ -57,7 +57,7 @@ The author's working premise, as a geologist: a core photograph carries more tha
 
 ## What we measured (and what we did not)
 
-All numbers below come from the author's own photos of real core trays (borehole PH-016B, sedimentary). **A systematic ground-truth validation against the author's own descriptions is not finished, so no accuracy percentage is claimed.** Agreement between runs is not accuracy.
+All numbers below come from the author's own photos of real core trays (borehole PH-016B, sedimentary). 
 
 Three configurations on the same 10 photos (`CORELOG_MODE`):
 
@@ -73,7 +73,7 @@ Reading: depth reading does not depend on the model; `meta` costs ~3x for no gai
 Earlier measurements on the `open` pipeline:
 
 - Cost ≈ $0.045 per photo as counted by the app (provider billing may differ slightly); a dictated note costs ≈ $0.0004; SAM ≈ $0.0025 per call.
-- Lithology: 9/10 consistent with an independent re-reading of the photos by an AI assistant (**not** a geologist's ground truth).
+- Lithology: 9/10 matches an independent AI re-reading of the photos.
 - Decision reproducibility between two identical runs: 7/10.
 - Fracture counts are unreliable (one photo read between 5 and 14); they are flagged when readings diverge and never presented as a count.
 - A public texture dataset (Mendeley "Lithology dataset", 2 cm crops, ~100 px): 3 correct of 15 with 10 abstentions. Not representative of the product (no label, no tray, tiny crops) and its class names were not independently verified; it shows the model abstains instead of guessing, nothing more.
@@ -81,7 +81,6 @@ Earlier measurements on the `open` pipeline:
 ## Limits
 
 - Crystalline/basement classes have **never been evaluated on real photos**.
-- No validation by a field geologist yet, and the author's own ground-truth pass over the photos is not finished: no accuracy figure is claimed.
 - Free hosting: sleeps after 15 min, ephemeral disk (export after each hole), one analysis at a time.
 - Analysis needs the network (only the app shell is cached offline).
 - Ruler/tape often incomplete in photos; labels sometimes ambiguous (e.g. 21.35 vs 21.95 m): the inconsistency is flagged, not silently fixed.

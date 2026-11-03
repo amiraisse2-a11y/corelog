@@ -51,9 +51,9 @@ Per photo, the user picks the rock domain: **Sedimentary** (8 classes), **Crysta
 
 Glimmer is part of the intended workflow: the plan was to host it on Modal with the hackathon credits and use it as the independent second reader. The author could not activate the credits: Modal refused every payment card he tried (several cards, including virtual ones; obtaining an international card is very hard in Côte d'Ivoire). The integration is in the code and switches on when `GLIMMER_URL` is set, but it has never been run, so we make no claim about its behaviour. In the meantime the second reader is Muse Spark 1.3 (default `mix`).
 
-## Why a vision model can read rock from pixels (author's position)
+## Why a vision model can read rock from pixels
 
-The author's working premise, as a geologist: a core photograph carries more than what a person consciously sees. Colour, grain texture, bedding and fissility, weathering and fracture surfaces are all encoded in the pixel values, and a vision model can use that information in ways that go beyond a quick human look. CoreLog builds on that premise but does not rely on it blindly: the model's reading is a proposal that code checks and a human validates.
+Published work shows that photographs of drill core carry geological information a model can extract. A CNN classified six formations from core images at 96.7% accuracy and predicted carbonate, silicate and clay content from images alone, comparably to log analysis when checked against XRD ([Swiss J. Geosci. 117:8, 2024](https://sjg.pensoft.net/article_preview.php?id=36836); [arXiv 2403.18495](https://arxiv.org/pdf/2403.18495)). Another study recovered lithological colour, bedding angle and cracks from core-tray photos ([arXiv 2608.12252](https://arxiv.org/pdf/2608.12252)), and a vision-language model described carbonate thin sections with 93.3% agreement with experts on depositional environment ([KFUPM, 2026](https://pure.kfupm.edu.sa/en/publications/vision-language-models-for-automated-carbonate-petrography-and-de/)). Those models are trained on single boreholes, so CoreLog treats the model's reading as a proposal that code checks and a human validates.
 
 ## What we measured (and what we did not)
 

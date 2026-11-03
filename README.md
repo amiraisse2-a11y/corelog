@@ -1,63 +1,113 @@
 # CoreLog
 
-Photo d'un plateau de carottes (+ note dictée facultative) → brouillon de journal lithologique structuré (run, profondeurs, foré/récupéré, lithologie, fractures), avec contrôles par le code, vote, abstention et validation humaine. Export CSV/JSON.
+**Drill-core photo → structured lithology log you can check, not a guess you must trust.**
 
-Projet du Meta Global AI Developer Hackathon (piste Indie).
+Photograph a core tray (and optionally dictate a note). CoreLog reads the label and the depths, proposes a lithology log, then **cross-checks it with plain code**, **abstains when evidence is weak**, and hands every uncertain case to a **human for validation** before CSV/JSON export.
 
-## Principe
-Le modèle propose, le code contrôle, l'humain décide. « Auto » signifie « relecture légère », jamais « validé ».
+Built for the Meta Global AI Developer Hackathon (Indie track), 26 Oct – 4 Nov 2026. Bilingual French/English PWA, used from a phone.
 
-| Étape | Qui | Rôle |
+Live demo: https://corelog.onrender.com (free tier: sleeps after 15 min, ~50 s to wake). Access is by code; a demo code is provided with the submission.
+
+## The problem
+
+Core logging is still largely manual and subjective: two geologists can describe the same core differently, and a long hole takes days or weeks. Seequent's announcement of its Imago image-analysis tool (13 Oct 2026) describes core logging as "manual and qualitative". Photos exist; trustworthy structured logs from them are the bottleneck.
+
+## Why this is not "just an image analyzer"
+
+A model that names a rock from a picture is easy and unreliable. The value here is everything around the model:
+
+- **Deterministic checks in code** on what the model read: depth arithmetic (start, end, drilled, recovered), order, gaps and overlaps between runs, hole-ID consistency across photos.
+- **Note vs photo**: the dictated note is compared with the photo reading by a code lexicon; a rock in the note that contradicts the domain you chose is flagged.
+- **Voting and abstention**: two independent readings, a third to break ties, majority vote; `unknown` is a valid answer and never counted as a disagreement.
+- **"Auto" never means "validated"**: it means "light review". Every uncertainty goes to a human, and the export records the human's decision.
+
+## Pipeline
+
+| Step | Who | Role |
 |---|---|---|
-| Qualité (netteté, lumière) | OpenCV, code | refuse les photos inexploitables avant tout appel payant |
-| Lecture carotte + étiquette | Muse Spark Open (Baseten) | JSON strict |
-| Seconde lecture | Muse Spark Open (ou Glimmer si `GLIMMER_URL` est défini) | auto-cohérence ; départage à 3 lectures si désaccord (vote majoritaire) |
-| Étiquette douteuse | SAM 3.1 + Spark Open | recadrage et relecture ciblée |
-| Note dictée | Muse Voice Transcribe | transcription (français) |
-| Contrôles | code Python | arithmétique foré/récupéré, ordre, trous, chevauchements, note contre photo, identifiant de forage |
-| Décision | humain | validation, correction, export |
+| Quality gate | OpenCV (code) | Blur, light, framing; rejects unusable photos before any paid call |
+| Main reading | **Muse Spark Open** (`meta-models/muse-spark-open-1026`, Baseten) | Strict JSON: label, depths, tape, lithology intervals, fractures |
+| Second reading | **Muse Spark 1.3** (Meta API) in the default `mix` mode | Independent second opinion from a different model; a third reading breaks ties |
+| Label re-read | **SAM 3.1** + Spark Open | SAM finds the paper label; the code crops it and the label is re-read sharper |
+| Dictation | **Muse Voice Transcribe 1.0** | Real-time WebSocket transcription (French) |
+| Checks | Python code | Depth arithmetic, order, gaps/overlaps, hole-ID vote, note vs photo |
+| Decision | Human | Validate, correct, comment, export CSV/JSON |
 
-## Lancer
+Per photo, the user picks the rock domain: **Sedimentary** (8 classes), **Crystalline** (10 classes, including `other`/`unknown`) or **Not sure** (all 16). The choice restricts the JSON-schema enum and the description rules the model sees, and is used to check the note. A **core-only** mode accepts photos without label or tape, with optional typed depths.
+
+## Meta models used (and what each really does)
+
+| Model | Role | Status |
+|---|---|---|
+| Muse Spark Open | Main reader, tiebreaker | Used |
+| Muse Spark 1.3 (Meta API) | Independent second reader (`mix`, default) | Used |
+| SAM 3.1 | Finds the label for a sharper re-read. Finds label and tape on 10/10 photos. Isolating the core itself did not work (tested, disabled) | Used |
+| Muse Voice Transcribe 1.0 | Dictated note → text, compared with the photo reading | Used |
+| Muse Wonder 1.0 | Second reader in `meta` mode | Implemented and compared, not default (3x the cost, no gain on depths) |
+| Glimmer | Optional second reader (`GLIMMER_URL`) | Wired in code, **never run**: the hosting card was refused, so it is not part of the results |
+
+## What we measured (and what we did not)
+
+All numbers below come from the author's own photos of real core trays (borehole PH-016B, sedimentary). **There is no geologist-validated ground truth yet.** Agreement between runs is not accuracy.
+
+Three configurations on the same 10 photos (`CORELOG_MODE`):
+
+| | `open` (Spark Open reads twice) | `meta` (Spark 1.3 + Wonder) | `mix` (Spark Open + Spark 1.3) |
+|---|---|---|---|
+| Cost, 10 photos | $0.45 | $1.25 | $0.42 |
+| Photos sent to human review | 5/10 | 3/10 | 3/10 |
+| Depths identical across modes | 10/10 | 10/10 | 10/10 |
+| Lithology identical to `open` | – | 7/10 | 8/10 |
+
+Reading: depth reading does not depend on the model; `meta` costs ~3x for no gain; `open` raises more alerts because one model contradicts itself on claystone vs shale (a real ambiguity, mostly a fissility question), whereas two different models are compared by rock family. One photo (the top 0–2.5 m, soil/fill vs sandstone) is read three different ways and is correctly sent to human review in every mode.
+
+Earlier measurements on the `open` pipeline:
+
+- Cost ≈ $0.045 per photo as counted by the app (provider billing may differ slightly); a dictated note costs ≈ $0.0004; SAM ≈ $0.0025 per call.
+- Lithology: 9/10 consistent with the author's own re-reading of the photos (**not** ground truth).
+- Decision reproducibility between two identical runs: 7/10.
+- Fracture counts are unreliable (one photo read between 5 and 14); they are flagged when readings diverge and never presented as a count.
+- A public texture dataset (Mendeley "Lithology dataset", 2 cm crops, ~100 px): 3 correct of 15 with 10 abstentions. Not representative of the product (no label, no tray, tiny crops) and its class names were not independently verified; it shows the model abstains instead of guessing, nothing more.
+
+## Limits
+
+- Crystalline/basement classes have **never been evaluated on real photos**.
+- No validation by a field geologist yet, and the author's own ground-truth pass over the photos is not finished: no accuracy figure is claimed.
+- Free hosting: sleeps after 15 min, ephemeral disk (export after each hole), one analysis at a time.
+- Analysis needs the network (only the app shell is cached offline).
+- Ruler/tape often incomplete in photos; labels sometimes ambiguous (e.g. 21.35 vs 21.95 m): the inconsistency is flagged, not silently fixed.
+- Voice transcription is French only.
+
+## Run it
+
 ```
-pip install -r requirements.txt   # + ffmpeg installé sur la machine
-export META_API_KEY=...  BASETEN_API_KEY=...  CORELOG_TOKEN=un-code-d-acces
+pip install -r requirements.txt     # ffmpeg must be installed
+export META_API_KEY=...  BASETEN_API_KEY=...  CORELOG_TOKEN=an-admin-code
 uvicorn server:app --port 7860
 ```
-Render (offre gratuite, Docker) : voir `render.yaml` ; les clés se saisissent dans le tableau de bord Render (variables d'environnement `META_API_KEY`, `BASETEN_API_KEY`, `CORELOG_TOKEN`, optionnel `GLIMMER_URL`, `GLIMMER_KEY`). Aucune clé dans le dépôt ni dans le navigateur. Le Space Hugging Face Docker n'est plus gratuit (abonnement PRO requis). Sans `CORELOG_TOKEN`, quiconque connaît l'adresse dépense tes crédits : toujours en définir un en ligne.
-Tests sans réseau : `PYTHONPATH=stub:. python test_server.py` (modèles remplacés par des réponses fictives) ; interface : `PYTHONPATH=stub:. python dev_fake.py`, puis http://127.0.0.1:8765 (le dossier `stub` ne sert qu'à ces tests ; ne pas l'utiliser en production, où le vrai paquet `openai` est installé).
 
-## Accès : administrateur et testeurs
-`CORELOG_TOKEN` = code administrateur (voit tout, dont l'écran Architecture et l'état des modèles). `CORELOG_DEMO_TOKENS` = codes de démonstration séparés par des virgules (ex. `demo-ana,demo-koffi`) : chaque code a son espace **privé** (les photos d'un testeur ne sont jamais visibles par un autre), pas d'écran Architecture, et un quota de `DEMO_MAX_PHOTOS` photos (40 par défaut) pour protéger tes crédits. Pour révoquer un testeur, retire son code de la variable.
+Render (free Docker): see `render.yaml`. Keys live only in environment variables, never in the repository or the browser. Without `CORELOG_TOKEN`, anyone who knows the URL spends your credits: always set one online.
 
-## Transférabilité (type de roche)
-Le type de roche est une donnée, pas du code : `domains/<id>.json` définit les lithologies (id, noms FR/EN, couleur, famille), les règles de description données au modèle et le lexique des notes dictées. `CORELOG_DOMAIN=auto` (défaut : fusion des deux ensembles ci-dessous, l'agent choisit lui-même ; la partie sédimentaire est testée, la partie socle ne l'est pas), `sedimentary` (testé) ou `crystalline` (granitoïdes, roches mafiques, gneiss, micaschistes, amphibolites, quartzites, saprolite, roches de faille : **non testé, aucune photo réelle évaluée**). Le contrôle qualité, la lecture de l'étiquette et du ruban, le vote et les contrôles par le code ne dépendent pas du type de roche. Pour ajouter un domaine : copier un fichier de `domains/`, garder les identifiants `other` et `unknown`, puis **mesurer sur des photos réelles avant de s'y fier**.
+Offline tests with fake models: `PYTHONPATH=stub:. python test_server.py` (also `test_roles.py`, `test_core_only.py`, `test_domaine.py`). UI without keys: `PYTHONPATH=stub:. python dev_fake.py`. `stub/` is for tests only.
 
-## Langues
-Français et anglais : bouton FR/EN en haut à droite (langue du téléphone par défaut). L'interface, les messages de contrôle de l'agent et les exports CSV/JSON suivent la langue choisie ; les règles de traduction sont dans `static/i18n.json` (une seule source pour le navigateur et le serveur). Un message d'agent sans règle reste en français : à compléter au fil des essais. Les notes dictées sont transcrites en français (`VOICE_LANG` dans `agent_core.py`).
+Environment variables: `BASETEN_MODEL` (default `meta-models/muse-spark-open-1026`, the only model the hackathon credits cover), `CORELOG_MODE` (`mix` default, `open`, `meta`), `CORELOG_DOMAIN` (`auto` default), `GLIMMER_URL` / `GLIMMER_KEY`, `DEMO_MAX_PHOTOS` (default 40), `DATA_DIR`.
 
-## Test réel (avec les vrais modèles)
-Une fois le serveur déployé avec ses clés : `python live_test.py https://ton-space.hf.space CODE dossier_photos` (audio du même nom = note dictée). Ce test n'a pas encore été exécuté.
+## Access: admin and testers
 
-## Chiffres mesurés (10 photos réelles, dernière version de l'agent)
-- Coût ≈ 0,46 $ pour 10 photos, ≈ 4 min (3 en parallèle). Dictée ≈ 0,0004 $ par note. SAM ≈ 0,0025 $ par appel.
-- Lithologie : 9/10 conforme à ma relecture des photos. **Ce n'est pas une vérité terrain** (aucune description de géologue de site).
-- Reproductibilité de la décision entre deux exécutions identiques : 7/10 (p31, p44, p54 changent).
-- SAM localise l'étiquette et le ruban 10/10. Détection de la carotte par SAM : non fiable ; isolation de la carotte testée (6/10 instable contre 2/10, aucun gain de lithologie) → désactivée (`SAM_CORE=False`).
-- Argilite/schiste : ambiguïté réelle (p05 bascule d'une exécution à l'autre) ; toujours « à confirmer ».
+`CORELOG_TOKEN` is the admin code (sees everything, including the Architecture screen with model status). `CORELOG_DEMO_TOKENS` is a comma-separated list of demo codes: each has a **private** workspace (one tester never sees another's photos), no Architecture screen, and a photo quota. Remove a code from the variable to revoke a tester. The Sondages home screen has a Log out button.
 
-## Limites connues
-- Fractures : estimation grossière (p06 lu entre 5 et 14) ; signalée quand les lectures divergent, jamais présentée comme un comptage.
-- Ruban souvent incomplet sur la photo : longueur visible parfois inconnue.
-- Étiquette parfois lue de façon ambiguë (p35 : fin lue 21,35 ou 21,95 pour 20,95 attendu) : l'incohérence est signalée, pas corrigée.
-- Pas de mode hors ligne : l'analyse se fait sur le serveur (seule la coque de l'application est en cache).
-- Une analyse à la fois (file d'attente) ; stockage SQLite : sur un Space gratuit le disque est éphémère → exporter après chaque sondage.
-- Glimmer (second avis indépendant) : pas encore hébergé ; sans lui, le second avis est le même modèle relu (auto-cohérence).
-- Interface testée dans un navigateur de bureau, caméra simulée ; **pas testée sur un vrai téléphone**, ni les appels réels aux modèles depuis le serveur.
-- Photo max 25 Mo ; pas de comptes (un seul code d'accès partagé).
+## Rock domains are data, not code
 
+`domains/<id>.json` defines lithologies (id, FR/EN names, colour, family), the description rules given to the model and the note lexicon. To add a domain: copy a file, keep `other` and `unknown`, and **measure on real photos before trusting it**.
 
-## Modèle Baseten du hackathon
+## Languages
 
-L'agent appelle `meta-models/muse-spark-open-1026` (le modèle du hackathon : les crédits offerts ne couvrent que lui). Variable `BASETEN_MODEL` pour le changer.
+French and English (FR/EN button, phone language by default). UI, agent messages and exports follow the chosen language; translation rules are in `static/i18n.json`. A message without a rule stays in French.
 
-Variable `CORELOG_MODE` : `open` (défaut, Spark Open lit deux fois), `mix` (Spark Open lit, Muse Spark 1.3 via l'API Meta fait la deuxième lecture indépendante) ou `meta` (Spark 1.3 + Muse Wonder). Comparaison sur 10 photos : profondeurs identiques dans les trois modes ; coût d'environ 0,045 $ (open), 0,042 $ (mix) et 0,125 $ (meta) par photo.
+## Built during the hackathon
+
+First commit 29 Oct 2026; everything in this repository was written for this event (git history is the record). Code written with AI assistance (Claude); design decisions, domain knowledge, photos and validation by the author.
+
+## Author
+
+Souleymane Touré. DTS (bachelor-level, Licence-equivalent) in Mining and Geology, petroleum option, INP-HB Yamoussoukro, Côte d'Ivoire. MIT licence.

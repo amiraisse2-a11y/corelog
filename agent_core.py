@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from openai import OpenAI
 
 # ---------- Réglages ----------
-MODE = os.environ.get("CORELOG_MODE", "open")   # "open" = Spark Open sur Baseten, 2e lecture du même modèle (+ Glimmer si GLIMMER_URL) | "mix" = Spark Open + 2e lecteur Spark 1.3 (API Meta) | "meta" = Spark 1.3 + Wonder (API Meta)
+MODE = os.environ.get("CORELOG_MODE", "mix")   # "open" = Spark Open sur Baseten, 2e lecture du même modèle (+ Glimmer si GLIMMER_URL) | "mix" (défaut) = Spark Open + 2e lecteur Spark 1.3 (API Meta) | "meta" = Spark 1.3 + Wonder (API Meta)
 SECOND_AVIS = "always" # "always" (recommandé : la confiance de Spark ne signale pas les cas difficiles) | "auto" | "never"
 NOTE_CHECK = "code"    # "code" = le code compare la note à la lecture de la photo (recommandé) | "modele" = jugement du modèle (trop sévère : 9 notes sur 10 refusées)
 CONF_FLAG = 0.5        # confiance en dessous de laquelle on signale la photo

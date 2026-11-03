@@ -17,3 +17,5 @@ services:
         sync: false
       - key: CORELOG_DOMAIN
         value: auto
+      - key: CORELOG_MODE
+        value: mix

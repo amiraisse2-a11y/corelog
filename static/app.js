@@ -88,7 +88,9 @@ async function vHome() {
   app.innerHTML = `<div class="mono">CoreLog</div><h1>Sondages</h1>
   ${l.length ? l.map(s => `<a class="card link" href="#/s/${s.id}"><b>${esc(s.nom)}</b><div class="mut">${s.photos} photo(s)</div></a>`).join("") : `<p class="mut">Aucun sondage. Crée-en un, puis photographie tes carottes run par run.</p>`}
   <label for="nom">Nouveau sondage</label><input id="nom" type="text" placeholder="ex. PH-016B" maxlength="80"><p></p>
-  <button class="full" id="add">Créer le sondage</button>`;
+  <button class="full" id="add">Créer le sondage</button>
+  <p></p><button class="ghost" id="out">Se déconnecter</button>`;
+  $("#out").onclick = () => { token = ""; DOMAINE = null; ROLE = "admin"; LS.set("corelog_token", ""); LS.set("corelog_sondage", ""); location.hash = "#/"; route(); };
   $("#add").onclick = async () => { const nom = $("#nom").value.trim(); if (!nom) return toast("Donne un nom au sondage.");
     const s = await api("/sondages", { method: "POST", body: { nom } }); LS.set("corelog_sondage", s.id); location.hash = "#/s/" + s.id; };
 }

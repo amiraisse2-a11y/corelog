@@ -362,9 +362,14 @@ async def diag(request):
             r = A.get_client(m).chat.completions.create(model=m, messages=[{"role": "user", "content": "Say OK"}], max_tokens=5)
             return "OK : " + (r.choices[0].message.content or "")[:20]
         except Exception as e: return "ERREUR : " + str(e)[:200]
-    ms = list(dict.fromkeys([A.PRIMARY, A.SECOND]))
+    def liste(m):   # modèles que la clé voit réellement depuis CE serveur (aucune clé dans la réponse)
+        try: return sorted(x.id for x in A.get_client(m).models.list())[:60]
+        except Exception as e: return "ERREUR : " + str(e)[:160]
+    ms = list(dict.fromkeys([A.PRIMARY, A.SECOND, "muse-spark-1.3"]))
     res = {m: await asyncio.to_thread(un, m) for m in ms}
-    return JSONResponse({"mode": A.MODE, "principal": A.PRIMARY, "second": A.SECOND, "tests": res})
+    return JSONResponse({"mode": A.MODE, "principal": A.PRIMARY, "second": A.SECOND, "tests": res,
+                         "modeles_vus_par_la_cle_meta": await asyncio.to_thread(liste, "muse-spark-1.3"),
+                         "cle_meta_longueur": len(A.KEY), "cle_meta_debut": A.KEY[:4], "cle_meta_espaces": A.KEY != A.KEY.strip()})
 
 
 async def health(request): return JSONResponse({"ok": True})

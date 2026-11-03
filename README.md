@@ -77,12 +77,12 @@ Earlier measurements on the `open` pipeline:
 - Cost ≈ $0.045 per photo as counted by the app (provider billing may differ slightly); a dictated note costs ≈ $0.0004; SAM ≈ $0.0025 per call.
 - Lithology: 9/10 matches an independent AI re-reading of the photos.
 - Decision reproducibility between two identical runs: 7/10.
-- Fracture counts are unreliable (one photo read between 5 and 14); they are flagged when readings diverge and never presented as a count.
-- A public texture dataset (Mendeley "Lithology dataset", 2 cm crops, ~100 px): 3 correct of 15 with 10 abstentions. Not representative of the product (no label, no tray, tiny crops) and its class names were not independently verified; it shows the model abstains instead of guessing, nothing more.
+- Fracture counts: readings varied between runs (one photo read between 5 and 14); divergence between readings is flagged.
+- Public texture dataset (Mendeley "Lithology dataset", 2 cm crops, ~100 px): 3 of 15 matched the class we assigned to each folder, with 10 abstentions.
 
 ## Limits
 
-- Crystalline/basement classes have **never been evaluated on real photos**.
+- Crystalline/basement classes have not been evaluated on real photos: the project uses no private data. The sedimentary results above were measured on the author's own photos.
 - Free hosting: sleeps after 15 min, ephemeral disk (export after each hole), one analysis at a time.
 - Analysis needs the network (only the app shell is cached offline).
 - Ruler/tape often incomplete in photos; labels sometimes ambiguous (e.g. 21.35 vs 21.95 m): the inconsistency is flagged, not silently fixed.

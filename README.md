@@ -59,6 +59,8 @@ The author's working premise, as a geologist: a core photograph carries more tha
 
 All numbers below come from the author's own photos of real core trays (borehole PH-016B, sedimentary). 
 
+On 10 real core photos, depth readings were identical across three model configurations, and lithology matched an independent AI re-reading on 9 of 10 photos. The mixed configuration cost about $0.04 per photo, versus about $0.125 with Muse Wonder as second reader and no gain on depths.
+
 Three configurations on the same 10 photos (`CORELOG_MODE`):
 
 | | `open` (Spark Open reads twice) | `meta` (Spark 1.3 + Wonder) | `mix` (Spark Open + Spark 1.3) |

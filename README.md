@@ -28,7 +28,7 @@ A model that names a rock from a picture is easy and unreliable. The value here 
 | Quality gate | OpenCV (code) | Blur, light, framing; rejects unusable photos before any paid call |
 | Main reading | **Muse Spark Open** (`meta-models/muse-spark-open-1026`, Baseten) | Strict JSON: label, depths, tape, lithology intervals, fractures |
 | Second reading | **Muse Spark 1.3** (Meta API, default `mix` mode) | Independent second opinion from a different model; a third reading breaks ties. If it is unreachable, the server falls back to a second Spark Open reading and says so |
-| Second reading, designed | **Glimmer** (Meta, self-hosted) | Part of the designed workflow as the independent second reader (`GLIMMER_URL`); see the note below: it could not be run |
+| Second reading, designed | **Glimmer** (Meta, self-hosted) | Part of the designed workflow as the independent second reader (`GLIMMER_URL`). Not running only because of a payment-card problem (see below) |
 | Label re-read | **SAM 3.1** + Spark Open | SAM finds the paper label; the code crops it and the label is re-read sharper |
 | Dictation | **Muse Voice Transcribe 1.0** | Real-time WebSocket transcription (French) |
 | Checks | Python code | Depth arithmetic, order, gaps/overlaps, hole-ID vote, note vs photo |
@@ -45,11 +45,11 @@ Per photo, the user picks the rock domain: **Sedimentary** (8 classes), **Crysta
 | SAM 3.1 | Finds the label for a sharper re-read. Finds label and tape on 10/10 photos. Isolating the core itself did not work (tested, disabled) | Used |
 | Muse Voice Transcribe 1.0 | Dictated note → text, compared with the photo reading | Used |
 | Muse Wonder 1.0 | Second reader of the `meta` mode, a complete alternative pipeline (Spark 1.3 reads, Wonder checks) that works without Baseten | Implemented, run on the 10-photo comparison, kept as the **fallback** if the Baseten path is unavailable; not default (about 3x the cost, no gain on depths) |
-| Glimmer | Designed second reader (`GLIMMER_URL`), wired in the code | **Never run**, see below; none of the results here involve it |
+| Glimmer | Designed second reader (`GLIMMER_URL`), wired in the code | **Never run**, only because the payment cards were refused (see below); none of the results here involve it |
 
 ### About Glimmer
 
-Glimmer is part of the intended workflow: the plan was to host it on Modal with the hackathon credits and use it as the independent second reader. The author could not activate the credits: Modal refused every payment card he tried (several cards, including virtual ones; obtaining an international card is very hard in Côte d'Ivoire). The integration is in the code and switches on when `GLIMMER_URL` is set, but it has never been run, so we make no claim about its behaviour. In the meantime the second reader is Muse Spark 1.3 (`mix`, default), or Spark Open itself in `open` mode.
+Glimmer is part of the intended workflow: the plan was to host it on Modal with the hackathon credits and use it as the independent second reader. The author could not activate the credits: Modal refused every payment card he tried (several cards, including virtual ones; obtaining an international card is very hard in Côte d'Ivoire). The card problem is the only reason Glimmer is not part of the running system: without it, Glimmer would have been used. The integration is in the code and switches on when `GLIMMER_URL` is set, but it has never been run, so we make no claim about its behaviour. In the meantime the second reader is Muse Spark 1.3 (`mix`, default), or Spark Open itself in `open` mode.
 
 ## Why a vision model can read rock from pixels
 
@@ -57,7 +57,7 @@ Published work shows that photographs of drill core carry geological information
 
 ## What we measured (and what we did not)
 
-All numbers below come from the author's own photos of real core trays (borehole PH-016B, sedimentary). 
+All numbers below come from the author's own photos of real core trays (borehole PH-016B, sedimentary).
 
 On 10 real core photos, depth readings were identical across three model configurations, and lithology matched an independent AI re-reading on 9 of 10 photos. The mixed configuration cost about $0.04 per photo, versus about $0.125 with Muse Wonder as second reader and no gain on depths.
 

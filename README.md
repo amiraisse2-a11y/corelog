@@ -77,8 +77,6 @@ Earlier measurements on the `open` pipeline:
 - Cost ≈ $0.045 per photo as counted by the app (provider billing may differ slightly); a dictated note costs ≈ $0.0004; SAM ≈ $0.0025 per call.
 - Lithology: 9/10 matches an independent AI re-reading of the photos.
 - Decision reproducibility between two identical runs: 7/10.
-- Fracture counts: readings varied between runs (one photo read between 5 and 14); divergence between readings is flagged.
-- Public texture dataset (Mendeley "Lithology dataset", 2 cm crops, ~100 px): 3 of 15 matched the class we assigned to each folder, with 10 abstentions.
 
 ## Limits
 

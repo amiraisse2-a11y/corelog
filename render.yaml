@@ -3,6 +3,7 @@ services:
     name: corelog
     runtime: docker
     plan: free
+    region: oregon
     healthCheckPath: /health
     envVars:
       - key: META_API_KEY
@@ -18,4 +19,4 @@ services:
       - key: CORELOG_DOMAIN
         value: auto
       - key: CORELOG_MODE
-        value: open
+        value: mix

@@ -149,10 +149,11 @@ SCHEMA = {"type": "object", "additionalProperties": False,
   "tape_gauche_cm": {"type": "number", "description": "Tape measure reading (cm) at the left edge of the core in the photo, -1 if unreadable"},
   "tape_droite_cm": {"type": "number", "description": "Tape measure reading (cm) at the right edge of the core in the photo, -1 if unreadable"},
   "intervalles": {"type": "array", "items": {"type": "object", "additionalProperties": False,
-     "required": ["zone", "lithologie", "description", "confiance"],
+     "required": ["zone", "lithologie", "description", "description_en", "confiance"],
      "properties": {"zone": {"type": "string", "enum": ["gauche", "milieu", "droite"]},
                     "lithologie": {"type": "string", "enum": LITHO},
                     "description": {"type": "string"},
+                    "description_en": {"type": "string", "description": "The same description and arguments, written in English"},
                     "confiance": {"type": "number", "description": "Confidence between 0 and 1"}}}},
   "fractures_estimees": {"type": "integer"},
   "incertitudes": {"type": "string"}}}
@@ -166,7 +167,7 @@ def _system(regles):
   + regles +
   "Report the tape readings (cm) at the left and right edge of the core. "
   "Left of the photo is usually shallower. Confidence values are between 0 and 1. "
-  "Write descriptions in French. In each interval description give your arguments in 1 to 3 short sentences: colour, grain size, structure (massive, laminated, bedded, bioturbated, mottled), fissility, fracturing or weathering, and which simple field test would confirm the rock (e.g. dilute HCl, scratch, wetting).")
+  "Write 'description' in French and 'description_en' as the same text in English. In each interval description give your arguments in 1 to 3 short sentences: colour, grain size, structure (massive, laminated, bedded, bioturbated, mottled), fissility, fracturing or weathering, and which simple field test would confirm the rock (e.g. dilute HCl, scratch, wetting).")
 SYSTEM_EXTRACT = _system(DOMAIN["regles_prompt"])
 
 
@@ -430,7 +431,7 @@ def _process(name, data, note, etiquette=True, meta=None, qc=True):
                 "lithologies": sorted({i["lithologie"] for i in a["intervalles"]}),
                 "conf_min": min([i["confiance"] for i in a["intervalles"]] or [0]),
                 "incertitudes": a["incertitudes"],
-                "arguments": [{"zone": i["zone"], "lithologie": i["lithologie"], "texte": i["description"], "confiance": i["confiance"]} for i in a["intervalles"]]})
+                "arguments": [{"zone": i["zone"], "lithologie": i["lithologie"], "texte": i["description"], "texte_en": i.get("description_en", ""), "confiance": i["confiance"]} for i in a["intervalles"]]})
     douteux = bool(re.search(r"(?i)incertain|illisible|possible|\?|\[", row["etiquette"] or ""))   # un crochet = annotation du modèle : une vraie étiquette n'en contient pas   # le modèle a lui-même signalé un doute (p44 : « PH-0160 [caractère final incertain] »)
     if etiquette and (not row["trou"] or (douteux and USE_SAM)):   # transcription ratée ou douteuse -> relecture ciblée de l'étiquette (outil), 1 seule fois
         cu = label_crop_uri(uri, f"SAM étiquette ({name})")

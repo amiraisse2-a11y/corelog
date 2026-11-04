@@ -228,7 +228,7 @@ async function vPhoto(pid) {
     <div><b>Visible (ruban)</b><span>${num(r.visible_m)} m</span></div><div><b>Fractures</b><span>${r.fractures >= 0 ? "~" + r.fractures : "—"}</span></div></div>
   ${r.note ? `<h2>Note</h2><div class="card">${esc(r.note)}</div>` : (p.note ? `<h2>Note</h2><div class="card">${esc(p.note)}</div>` : "")}
   <h2>Lithologie</h2><p class="mut" style="margin-top:-4px">Proposée par l'agent : ${esc(agent.map(lname).join(", ") || "—")}${r.conf_min !== undefined ? " · confiance min. " + r.conf_min : ""}</p>
-  ${(r.arguments || []).length ? `<h2>Pourquoi cette roche</h2><div class="card">${r.arguments.map(x => `<p style="margin:0 0 8px"><b>${esc(lname(x.lithologie))}</b> <span class="mut">(${esc(x.zone)}, ${Math.round((x.confiance || 0) * 100)} %)</span><br>${esc(x.texte)}</p>`).join("")}</div>` : ""}
+  ${(r.arguments || []).length ? `<h2>Pourquoi cette roche</h2><div class="card">${r.arguments.map(x => `<p style="margin:0 0 8px"><b>${esc(lname(x.lithologie))}</b> <span class="mut">(${esc(x.zone)}, ${Math.round((x.confiance || 0) * 100)} %)</span><br>${esc(lang === "en" && x.texte_en ? x.texte_en : x.texte)}</p>`).join("")}</div>` : ""}
   <div class="chips" id="lits"></div>
   <h2>Fractures (corriger)</h2>
   <div class="row" style="align-items:center"><button class="sec" id="m" aria-label="Moins">−</button><div style="text-align:center;font-size:24px;font-weight:600" id="fr"></div><button class="sec" id="pl" aria-label="Plus">+</button></div>

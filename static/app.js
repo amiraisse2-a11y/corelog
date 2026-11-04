@@ -193,7 +193,7 @@ function stepLabel(e) {
   if (/qualit/i.test(s)) return ["Contrôle qualité de la photo", "OpenCV · code déterministe"];
   if (/transcription/i.test(s)) return ["Transcription de la note dictée", "Muse Voice Transcribe"];
   if (/départage/i.test(s)) return ["Troisième lecture (départage)", "Muse Spark Open"];
-  if (/second avis/i.test(s)) return ["Seconde lecture indépendante", e.modele === "glimmer" ? "Glimmer" : "Muse Spark Open"];
+  if (/second avis/i.test(s)) return ["Seconde lecture indépendante", e.modele === "glimmer" ? "Glimmer" : /spark-1\.3/.test(e.modele || "") ? "Muse Spark 1.3" : /wonder/.test(e.modele || "") ? "Muse Wonder 1.0" : "Muse Spark Open"];
   if (/extraction principale|nouvelle extraction/i.test(s)) return ["Lecture de la carotte et de l'étiquette", "Muse Spark Open"];
   if (/sam|étiquette|label/i.test(s) || /sam/i.test(e.modele || "")) return ["Relecture ciblée de l'étiquette", /sam/i.test(e.modele || "") ? "SAM 3.1 (recadrage)" : "Muse Spark Open"];
   return [s, e.modele || ""];

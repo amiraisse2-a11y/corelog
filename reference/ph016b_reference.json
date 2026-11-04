@@ -1,0 +1,129 @@
+{
+ "borehole": "PH-016B",
+ "status": "reference by geologist reading of photos, to be validated by the author; no field tests (HCl, scratch) were done",
+ "runs": [
+  {
+   "run": 1,
+   "start_m": 0.0,
+   "end_m": 2.5,
+   "drilled_m": 2.5,
+   "recovered_m": 1.85,
+   "lithology": [
+    "soil_or_fill",
+    "unlithified_clay",
+    "marl"
+   ],
+   "evidence": "Roots and grass at the top, then brown-grey weathered clayey material with pale carbonate-looking fragments; pale grey rock at the right end.",
+   "fractures_approx": 8
+  },
+  {
+   "run": 2,
+   "start_m": 2.5,
+   "end_m": 3.6,
+   "drilled_m": 1.1,
+   "recovered_m": 1.1,
+   "lithology": [
+    "marl"
+   ],
+   "evidence": "Pale grey-green, fine, banded; fractured with orange iron-oxide staining along fractures; weathered top.",
+   "fractures_approx": 8
+  },
+  {
+   "run": 3,
+   "start_m": 3.6,
+   "end_m": 6.6,
+   "drilled_m": 3.0,
+   "recovered_m": 3.0,
+   "lithology": [
+    "marl"
+   ],
+   "evidence": "Light grey, fine; broken angular pieces on the left, competent massive cylinders on the right.",
+   "fractures_approx": 12
+  },
+  {
+   "run": 4,
+   "start_m": 6.6,
+   "end_m": 9.6,
+   "drilled_m": 3.0,
+   "recovered_m": 3.0,
+   "lithology": [
+    "marl"
+   ],
+   "evidence": "Pale grey-green, homogeneous, smooth, massive; ochre oxidation and transverse fractures toward the right end.",
+   "fractures_approx": 4
+  },
+  {
+   "run": 5,
+   "start_m": 9.6,
+   "end_m": 12.6,
+   "drilled_m": 3.0,
+   "recovered_m": 3.0,
+   "lithology": [
+    "marl"
+   ],
+   "evidence": "Medium grey, massive, slightly rough surface with burrow-like mottling; one transverse fracture.",
+   "fractures_approx": 1
+  },
+  {
+   "run": 7,
+   "start_m": 15.6,
+   "end_m": 18.6,
+   "drilled_m": 3.0,
+   "recovered_m": 3.0,
+   "lithology": [
+    "marl"
+   ],
+   "evidence": "Grey-green with dark grey to black irregular clay seams and laminae; a fracture with dark filling.",
+   "fractures_approx": 4
+  },
+  {
+   "run": 8,
+   "start_m": 18.6,
+   "end_m": 21.95,
+   "drilled_m": 2.35,
+   "recovered_m": 2.3,
+   "lithology": [
+    "claystone"
+   ],
+   "evidence": "Green-grey fine rock; competent piece on the left, then crushed fragments and debris (drilling-disturbed); empty liner at the right end. Label arithmetic: 21.95-18.6 = 3.35, label says 2.35.",
+   "fractures_approx": 10
+  },
+  {
+   "run": 10,
+   "start_m": 21.6,
+   "end_m": 24.6,
+   "drilled_m": 3.0,
+   "recovered_m": 3.0,
+   "lithology": [
+    "marl",
+    "shale"
+   ],
+   "evidence": "Grey-green finely laminated core passing to dark brown-black, fissile, glossy laminated core; massive dark piece on the right. Start depth 21.6 overlaps Run 8 end (21.95).",
+   "fractures_approx": 6
+  },
+  {
+   "run": 11,
+   "start_m": 24.6,
+   "end_m": 26.1,
+   "drilled_m": 1.5,
+   "recovered_m": 1.35,
+   "lithology": [
+    "shale"
+   ],
+   "evidence": "Black to very dark grey, glossy (wet film or organic coating), massive to faintly banded; one lighter grey massive piece.",
+   "fractures_approx": 5
+  },
+  {
+   "run": 14,
+   "start_m": 29.1,
+   "end_m": 30.7,
+   "drilled_m": 1.6,
+   "recovered_m": 1.6,
+   "lithology": [
+    "marl"
+   ],
+   "evidence": "Pale blue-grey, finely laminated, with mm-scale dark streaks (bioturbation or organic/sulphide); last pieces broken.",
+   "fractures_approx": 3
+  }
+ ]
+}

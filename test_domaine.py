@@ -14,8 +14,8 @@ assert r["domaine"] == "crystalline"
 r = A.safe_process("a.jpg", data, None, etiquette=False, qc=False, domaine="sedimentary")
 assert "sandstone" in vus["enum"] and "granite" not in vus["enum"], vus["enum"]
 r = A.safe_process("a.jpg", data, None, etiquette=False, qc=False)
-assert len(vus["enum"]) == {"auto": 16, "sedimentary": 8, "crystalline": 10}[A.DOMAIN_ID]
-A.safe_process("a.jpg", data, None, etiquette=False, qc=False, domaine="auto"); assert len(vus["enum"]) == 16, vus["enum"]
+assert len(vus["enum"]) == {"auto": 18, "sedimentary": 10, "crystalline": 10}[A.DOMAIN_ID]
+A.safe_process("a.jpg", data, None, etiquette=False, qc=False, domaine="auto"); assert len(vus["enum"]) == 18, vus["enum"]
 # note hors domaine
 r = A.safe_process("a.jpg", data, "du granite avec deux fractures", etiquette=False, qc=False, domaine="sedimentary")
 assert any("hors du domaine" in d for d in r["drapeaux"]), r["drapeaux"]

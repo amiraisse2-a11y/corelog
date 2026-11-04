@@ -35,6 +35,20 @@
    "famille": "fin"
   },
   {
+   "id": "marl",
+   "fr": "marne",
+   "en": "marl",
+   "couleur": "#9FB0B5",
+   "famille": "fin"
+  },
+  {
+   "id": "siltstone",
+   "fr": "siltite",
+   "en": "siltstone",
+   "couleur": "#8C8478",
+   "famille": "fin"
+  },
+  {
    "id": "unlithified_clay",
    "fr": "argile meuble",
    "en": "unconsolidated clay",
@@ -63,7 +77,7 @@
    "famille": "inconnu"
   }
  ],
- "regles_prompt": "Fine-grained rocks: massive, homogeneous, blocky breaks -> claystone; fissile, finely laminated or bedded -> shale; unlithified_clay only if the core is soft or plastic, smeared by drilling, with no lamination and no sharp fractures. Distinguish unlithified clay or soil from lithified rock. ",
+ "regles_prompt": "Fine-grained rocks: massive, homogeneous, blocky breaks -> claystone; fissile, finely laminated or bedded -> shale; pale or light blue-grey, fine and cohesive, matte, with a carbonate-rich look (lighter than claystone, may be slightly calcareous) -> marl (confirm with dilute HCl); silt-grade, slightly gritty, grains barely visible, no clear fissility -> siltstone; unlithified_clay only if the core is soft or plastic, smeared by drilling, with no lamination and no sharp fractures. Distinguish unlithified clay or soil from lithified rock. Lamination is a structure: mention it in the description, do not change the rock name for it alone. ",
  "lexique_note": [
   [
    "argil\\w*\\s+(meuble|molle|plastique|non\\s+lithifi\\w*)|non\\s+lithifi\\w*",
@@ -88,6 +102,14 @@
   [
    "arg[ieéè]l\\w*|claystone|mudstone",
    "claystone"
+  ],
+  [
+   "marne|marl|marn\\w*",
+   "marl"
+  ],
+  [
+   "siltite|siltstone|silteu\\w*|silt\\b",
+   "siltstone"
   ]
  ]
 }

@@ -34,7 +34,7 @@ A model that names a rock from a picture is easy and unreliable. The value here 
 | Checks | Python code | Depth arithmetic, order, gaps/overlaps, hole-ID vote, note vs photo |
 | Decision | Human | Validate, correct, comment, export CSV/JSON |
 
-Per photo, the user picks the rock domain: **Sedimentary** (8 classes), **Crystalline** (10 classes, including `other`/`unknown`) or **Not sure** (all 16). The choice restricts the JSON-schema enum and the description rules the model sees, and is used to check the note. A **core-only** mode accepts photos without label or tape, with optional typed depths.
+Per photo, the user picks the rock domain: **Sedimentary** (10 classes, incl. marl and siltstone), **Crystalline** (10 classes, including `other`/`unknown`) or **Not sure** (all 18). The choice restricts the JSON-schema enum and the description rules the model sees, and is used to check the note. A **core-only** mode accepts photos without label or tape, with optional typed depths.
 
 ## Meta models used (and what each really does)
 
@@ -114,7 +114,7 @@ French and English (FR/EN button, phone language by default). UI, agent messages
 
 ## Built during the hackathon
 
-First commit 29 Oct 2026; everything in this repository was written for this event (git history is the record). The author acted as architect and domain expert (problem, pipeline design, checks, rock domains, photos, acceptance); the code was written with AI assistance (Claude).
+First commit 29 Oct 2026; everything in this repository was written for this event (git history is the record). The author acted as architect and domain expert (problem, pipeline design, checks, rock domains, photos, acceptance); the code was written with AI assistance.
 
 ## Author
 

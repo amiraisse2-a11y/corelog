@@ -1,6 +1,6 @@
 {
  "borehole": "PH-016B",
- "status": "reference by geologist reading of photos, to be validated by the author; no field tests (HCl, scratch) were done",
+ "status": "reference reading of the photos, reviewed by the author (geologist); no field tests (HCl, scratch) were done",
  "runs": [
   {
    "run": 1,

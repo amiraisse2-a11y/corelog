@@ -59,7 +59,7 @@ Published work shows that photographs of drill core carry geological information
 
 All numbers below come from the author's own photos of real core trays (borehole PH-016B, sedimentary).
 
-On 10 real core photos, depth readings were identical across three model configurations, and lithology matched an independent AI re-reading on 9 of 10 photos. The mixed configuration cost about $0.04 per photo, versus about $0.125 with Muse Wonder as second reader and no gain on depths.
+On 10 real core photos, depth readings were identical across three model configurations, and lithology matched the author's reference reading (geologist-reviewed) on 9 of 10 photos. The mixed configuration cost about $0.04 per photo, versus about $0.125 with Muse Wonder as second reader and no gain on depths.
 
 Three configurations on the same 10 photos (`CORELOG_MODE`):
 
@@ -75,7 +75,7 @@ Reading: depth reading does not depend on the model; `meta` costs ~3x for no gai
 Earlier measurements on the `open` pipeline:
 
 - Cost ≈ $0.045 per photo as counted by the app (provider billing may differ slightly); a dictated note costs ≈ $0.0004; SAM ≈ $0.0025 per call.
-- Lithology: 9/10 matches an independent AI re-reading of the photos.
+- Lithology: 9/10 matches the author's reference reading of the photos (geologist-reviewed).
 - Decision reproducibility between two identical runs: 7/10.
 
 ## Limits
